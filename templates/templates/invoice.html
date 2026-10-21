@@ -1,0 +1,1192 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Invoice {{ bill["bill_number"] }}
+    </title>
+
+    <style>
+
+        /* ---- Settings: logo, tax, paper size ---- */
+
+        .business-logo {
+            max-height: 70px;
+            max-width: 200px;
+            display: block;
+            margin-bottom: 10px;
+            object-fit: contain;
+        }
+
+        .tax-box {
+            margin-top: 14px;
+            border-top: 1px dashed #cbd5e1;
+            padding-top: 10px;
+            font-size: 13px;
+        }
+
+        .tax-box .summary-row {
+            font-size: 13px;
+        }
+
+        .thank-you { white-space: pre-line; }
+
+        .invoice-note {
+            margin-top: 14px;
+            font-size: 13px;
+            color: #475569;
+            white-space: pre-line;
+        }
+
+        /* A5 */
+        body.paper-A5 .invoice { max-width: 560px; }
+
+        /* Thermal receipts */
+        body.paper-Thermal80 .invoice { max-width: 302px; padding: 14px; font-size: 12px; }
+        body.paper-Thermal58 .invoice { max-width: 219px; padding: 10px; font-size: 11px; }
+
+        body.paper-Thermal80 .invoice-header,
+        body.paper-Thermal58 .invoice-header { flex-direction: column; gap: 8px; text-align: left; }
+
+        body.paper-Thermal80 .invoice-title,
+        body.paper-Thermal58 .invoice-title { text-align: left; }
+
+        body.paper-Thermal80 .invoice-title h1,
+        body.paper-Thermal58 .invoice-title h1 { font-size: 18px; }
+
+        body.paper-Thermal80 .invoice-info,
+        body.paper-Thermal58 .invoice-info { display: none; }
+
+        body.paper-Thermal80 .invoice-table th,
+        body.paper-Thermal80 .invoice-table td,
+        body.paper-Thermal58 .invoice-table th,
+        body.paper-Thermal58 .invoice-table td { padding: 5px 3px; font-size: 11px; }
+
+        body.paper-Thermal80 .invoice-summary,
+        body.paper-Thermal58 .invoice-summary { width: 100%; }
+
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: #eef1f6;
+            color: #17233c;
+
+            font-family:
+                Inter,
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                Arial,
+                sans-serif;
+        }
+
+
+        /* =========================
+           TOP BAR
+        ========================= */
+
+        .invoice-toolbar {
+
+            position: sticky;
+            top: 0;
+
+            z-index: 100;
+
+            min-height: 70px;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            padding: 0 30px;
+
+            background: rgba(255,255,255,0.94);
+
+            backdrop-filter: blur(15px);
+
+            border-bottom: 1px solid #e2e8f0;
+
+            box-shadow:
+                0 4px 20px rgba(15,23,42,0.06);
+        }
+
+
+        .invoice-brand {
+
+            display: flex;
+            align-items: center;
+
+            gap: 10px;
+
+            font-weight: 800;
+
+            font-size: 20px;
+        }
+
+
+        .invoice-brand-icon {
+
+            width: 38px;
+            height: 38px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 10px;
+
+            background: #eef2ff;
+        }
+
+
+        .invoice-toolbar-actions {
+
+            display: flex;
+            gap: 10px;
+        }
+
+
+        .toolbar-button {
+
+            border: 0;
+
+            min-height: 40px;
+
+            padding: 0 15px;
+
+            border-radius: 9px;
+
+            cursor: pointer;
+
+            font-weight: 700;
+
+            transition: 0.2s ease;
+        }
+
+
+        .back-button {
+
+            background: #f1f5f9;
+
+            color: #334155;
+        }
+
+
+        .print-button {
+
+            color: white;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #4f46e5,
+                    #7c3aed
+                );
+
+            box-shadow:
+                0 7px 18px
+                rgba(79,70,229,0.22);
+        }
+
+
+        .toolbar-button:hover {
+
+            transform:
+                translateY(-2px);
+        }
+
+
+        /* =========================
+           INVOICE PAGE
+        ========================= */
+
+        .invoice-wrapper {
+
+            padding: 40px 20px 70px;
+        }
+
+
+        .invoice {
+
+            width: 100%;
+            max-width: 900px;
+
+            margin: auto;
+
+            background: white;
+
+            padding: 50px;
+
+            border-radius: 6px;
+
+            box-shadow:
+                0 20px 60px
+                rgba(15,23,42,0.10);
+        }
+
+
+        /* =========================
+           HEADER
+        ========================= */
+
+        .invoice-header {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            gap: 30px;
+
+            padding-bottom: 28px;
+
+            border-bottom:
+                2px solid #17233c;
+        }
+
+
+        .business-name {
+
+            margin: 0;
+
+            font-size: 28px;
+
+            font-weight: 800;
+
+            color: #17233c;
+        }
+
+
+        .business-details {
+
+            margin-top: 10px;
+
+            color: #64748b;
+
+            font-size: 13px;
+
+            line-height: 1.7;
+        }
+
+
+        .invoice-title {
+
+            text-align: right;
+        }
+
+
+        .invoice-title h1 {
+
+            margin: 0;
+
+            font-size: 32px;
+
+            letter-spacing: 1px;
+
+            color: #4f46e5;
+        }
+
+
+        .invoice-number {
+
+            margin-top: 8px;
+
+            color: #64748b;
+
+            font-size: 13px;
+        }
+
+
+        .invoice-date {
+
+            margin-top: 4px;
+
+            color: #64748b;
+
+            font-size: 12px;
+        }
+
+
+        /* =========================
+           INFO
+        ========================= */
+
+        .invoice-info {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            gap: 30px;
+
+            margin:
+                28px 0;
+        }
+
+
+        .info-block {
+
+            flex: 1;
+        }
+
+
+        .info-label {
+
+            color: #94a3b8;
+
+            font-size: 10px;
+
+            font-weight: 800;
+
+            text-transform: uppercase;
+
+            letter-spacing: 1px;
+
+            margin-bottom: 5px;
+        }
+
+
+        .info-value {
+
+            color: #334155;
+
+            font-size: 14px;
+
+            font-weight: 600;
+        }
+
+
+        /* =========================
+           ITEMS
+        ========================= */
+
+        .invoice-table {
+
+            width: 100%;
+
+            border-collapse: collapse;
+
+            margin-top: 10px;
+        }
+
+
+        .invoice-table th {
+
+            padding:
+                13px 10px;
+
+            text-align: left;
+
+            background: #f8fafc;
+
+            color: #64748b;
+
+            font-size: 10px;
+
+            text-transform: uppercase;
+
+            letter-spacing: .7px;
+
+            border-bottom:
+                1px solid #e2e8f0;
+        }
+
+
+        .invoice-table td {
+
+            padding:
+                15px 10px;
+
+            border-bottom:
+                1px solid #edf0f4;
+
+            font-size: 13px;
+        }
+
+
+        .invoice-table th:last-child,
+        .invoice-table td:last-child {
+
+            text-align: right;
+        }
+
+
+        .item-name {
+
+            font-weight: 700;
+
+            color: #17233c;
+        }
+
+
+        .item-unit {
+
+            display: block;
+
+            margin-top: 3px;
+
+            color: #94a3b8;
+
+            font-size: 11px;
+        }
+
+
+        /* =========================
+           TOTAL
+        ========================= */
+
+        .invoice-summary {
+
+            width: 300px;
+
+            margin-left: auto;
+
+            margin-top: 25px;
+        }
+
+
+        .summary-row {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            padding: 8px 0;
+
+            color: #64748b;
+
+            font-size: 13px;
+        }
+
+
+        .summary-row.total {
+
+            margin-top: 10px;
+
+            padding-top: 15px;
+
+            border-top:
+                2px solid #17233c;
+
+            color: #17233c;
+
+            font-size: 20px;
+
+            font-weight: 800;
+        }
+
+
+        /* =========================
+           FOOTER
+        ========================= */
+
+        .invoice-footer {
+
+            margin-top: 45px;
+
+            padding-top: 20px;
+
+            border-top:
+                1px solid #e2e8f0;
+
+            text-align: center;
+
+            color: #94a3b8;
+
+            font-size: 11px;
+
+            line-height: 1.6;
+        }
+
+
+        .thank-you {
+
+            margin-bottom: 5px;
+
+            color: #334155;
+
+            font-size: 13px;
+
+            font-weight: 700;
+        }
+
+
+        /* =========================
+           ANIMATION
+        ========================= */
+
+        @keyframes invoiceAppear {
+
+            from {
+
+                opacity: 0;
+
+                transform:
+                    translateY(20px)
+                    scale(.99);
+
+            }
+
+            to {
+
+                opacity: 1;
+
+                transform:
+                    translateY(0)
+                    scale(1);
+
+            }
+
+        }
+
+
+        /* =========================
+           PRINT
+        ========================= */
+
+        @media print {
+
+            @page {
+
+                {% if settings.paper_size == "A5" %}
+                size: A5;
+                margin: 8mm;
+                {% elif settings.paper_size == "Thermal80" %}
+                size: 80mm auto;
+                margin: 3mm;
+                {% elif settings.paper_size == "Thermal58" %}
+                size: 58mm auto;
+                margin: 2mm;
+                {% else %}
+                size: A4;
+                margin: 12mm;
+                {% endif %}
+            }
+
+
+            body {
+
+                background: white;
+            }
+
+
+            .invoice-toolbar {
+
+                display: none;
+            }
+
+
+            .invoice-wrapper {
+
+                padding: 0;
+            }
+
+
+            .invoice {
+
+                max-width: none;
+
+                padding: 0;
+
+                box-shadow: none;
+
+                border-radius: 0;
+
+                animation: none;
+            }
+
+        }
+
+
+        /* =========================
+           MOBILE
+        ========================= */
+
+        @media (max-width: 650px) {
+
+            .invoice-toolbar {
+
+                padding:
+                    0 15px;
+            }
+
+
+            .invoice-brand {
+
+                font-size: 16px;
+            }
+
+
+            .invoice-brand-icon {
+
+                width: 34px;
+                height: 34px;
+            }
+
+
+            .invoice-toolbar-actions {
+
+                gap: 5px;
+            }
+
+
+            .toolbar-button {
+
+                padding:
+                    0 10px;
+
+                font-size: 12px;
+            }
+
+
+            .invoice-wrapper {
+
+                padding:
+                    15px 8px 30px;
+            }
+
+
+            .invoice {
+
+                padding: 25px 18px;
+
+                border-radius: 0;
+            }
+
+
+            .invoice-header {
+
+                flex-direction: column;
+
+                gap: 20px;
+            }
+
+
+            .invoice-title {
+
+                text-align: left;
+            }
+
+
+            .invoice-title h1 {
+
+                font-size: 27px;
+            }
+
+
+            .invoice-info {
+
+                flex-direction: column;
+
+                gap: 15px;
+            }
+
+
+            .invoice-table {
+
+                font-size: 11px;
+            }
+
+
+            .invoice-table th,
+            .invoice-table td {
+
+                padding:
+                    10px 5px;
+            }
+
+
+            .invoice-summary {
+
+                width: 100%;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body class="paper-{{ settings.paper_size }}">
+
+
+    <!-- =========================
+         TOOLBAR
+    ========================= -->
+
+    <div class="invoice-toolbar">
+
+        <div class="invoice-brand">
+
+            <div class="invoice-brand-icon">
+                📦
+            </div>
+
+            {{ settings.store_name or "Invoice" }}
+
+        </div>
+
+
+        <div class="invoice-toolbar-actions">
+
+            <button
+                class="toolbar-button back-button"
+                onclick="window.location.href='/dashboard'"
+                title="Go to Dashboard"
+            >
+                🏠 Home
+            </button>
+
+            <button
+                class="toolbar-button back-button"
+                onclick="window.location.href='/billing'"
+                title="Create a new bill"
+                style="color: #16a34a; border-color: #bbf7d0; background: #f0fdf4; font-weight:700;"
+            >
+                ➕ New Bill
+            </button>
+
+            <button
+                class="toolbar-button back-button"
+                onclick="goBackToCart()"
+                title="Return to Cart to edit this bill"
+                style="color: #4f46e5; font-weight: 700;"
+            >
+                ← Back to Cart
+            </button>
+
+            <button
+                class="toolbar-button back-button"
+                onclick="downloadPDF()"
+                title="Download as PDF"
+            >
+                ⬇️ Download PDF
+            </button>
+
+            <button
+                class="toolbar-button print-button"
+                onclick="window.print()"
+            >
+                🖨️ Print
+            </button>
+
+            <button
+                class="toolbar-button back-button"
+                onclick="deleteThisBill()"
+                title="Delete this bill and restore stock"
+                style="color: #dc2626; border-color: #fecaca; background: #fef2f2;"
+            >
+                🗑️ Delete Bill
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================
+         INVOICE
+    ========================= -->
+
+    <div class="invoice-wrapper">
+
+        <div class="invoice" id="invoiceContent">
+
+
+            <!-- HEADER -->
+
+            <div class="invoice-header">
+
+                <div>
+
+                    {% if settings.logo and settings.show_logo %}
+                    <img class="business-logo" src="{{ settings.logo }}" alt="Logo">
+                    {% endif %}
+
+                    <h2 class="business-name">
+                        {{ settings.store_name or "Invoice" }}
+                    </h2>
+
+
+                    <div class="business-details">
+
+                        {% if business %}
+
+                            {% if business["address"] %}
+                                {{ business["address"] }}{% if business["city"] %}, {{ business["city"] }}{% endif %}{% if business["state"] %}, {{ business["state"] }}{% endif %}{% if business["postal_code"] %} - {{ business["postal_code"] }}{% endif %}<br>
+                            {% endif %}
+
+                            {% if business["phone"] %}
+                                Phone: {{ business["phone"] }}<br>
+                            {% endif %}
+
+                            {% if business["email"] %}
+                                Email: {{ business["email"] }}<br>
+                            {% endif %}
+
+                            {% if business["gstin"] %}
+                                GSTIN: {{ business["gstin"] }}
+                            {% endif %}
+
+                        {% else %}
+
+                            Professional Billing System
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+
+                <div class="invoice-title">
+
+                    <h1>
+                        {% if bill["tax_rate"] %}TAX INVOICE{% else %}INVOICE{% endif %}
+                    </h1>
+
+                    <div class="invoice-number">
+
+                        Invoice No:
+                        <strong>
+                            {{ bill["bill_number"] }}
+                        </strong>
+
+                    </div>
+
+                    <div class="invoice-date">
+
+                        Date:
+                        {{ bill["created_at"]|local_datetime }}
+
+                    </div>
+
+                    {% if bill["customer_name"] %}
+                    <div class="invoice-date">
+
+                        Customer:
+                        <strong>{{ bill["customer_name"] }}</strong>
+
+                    </div>
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+            <!-- INFO -->
+
+            <div class="invoice-info">
+
+                <div class="info-block">
+
+                    <div class="info-label">
+                        Payment Status
+                    </div>
+
+                    <div class="info-value">
+                        {% if bill["payment_method"] == "Credit" %}
+                            Pending (Credit)
+                        {% else %}
+                            Paid{% if bill["payment_method"] %} - {{ bill["payment_method"] }}{% endif %}
+                        {% endif %}
+                    </div>
+
+                </div>
+
+
+                <div class="info-block">
+
+                    <div class="info-label">
+                        Invoice Number
+                    </div>
+
+                    <div class="info-value">
+                        {{ bill["bill_number"] }}
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ITEMS -->
+
+            <table class="invoice-table">
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Item
+                        </th>
+
+                        <th>
+                            Qty
+                        </th>
+
+                        <th>
+                            Price
+                        </th>
+
+                        <th>
+                            Amount
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for item in items %}
+
+                    <tr>
+
+                        <td>
+
+                            <div class="item-name">
+                                {{ item["product_name"] }}
+                            </div>
+
+                            <span class="item-unit">
+                                Price / {{ item["price_basis"] }}
+                            </span>
+
+                        </td>
+
+
+                        <td>
+
+                            {{ item["quantity"] }}
+                            {{ item["quantity_unit"] }}
+
+                        </td>
+
+
+                        <td>
+
+                            {{ settings.currency_symbol }}{{ "%.2f"|format(item["price"]) }}
+
+                        </td>
+
+
+                        <td>
+
+                            {{ settings.currency_symbol }}{{ "%.2f"|format(item["total"]) }}
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+
+            <!-- SUMMARY -->
+
+            <div class="invoice-summary">
+
+                <div class="summary-row">
+
+                    <span>
+                        Items
+                    </span>
+
+                    <strong>
+                        {{ items|length }}
+                    </strong>
+
+                </div>
+
+                {% if bill["discount_amount"] and bill["discount_amount"] > 0 %}
+                <div class="summary-row" style="color: #16a34a; font-weight: 700;">
+                    <span>
+                        Discount {% if bill["discount_percent"] and bill["discount_percent"] > 0 %}({{ "%g"|format(bill["discount_percent"]) }}%{% if bill["flat_discount"] and bill["flat_discount"] > 0 %} + {{ settings.currency_symbol }}{{ "%g"|format(bill["flat_discount"]) }} off{% endif %}){% elif bill["flat_discount"] and bill["flat_discount"] > 0 %}(Direct Less){% endif %}
+                    </span>
+                    <span>
+                        -{{ settings.currency_symbol }}{{ "%.2f"|format(bill["discount_amount"]) }}
+                    </span>
+                </div>
+                {% endif %}
+
+
+                {% if bill["tax_rate"] %}
+                <div class="tax-box">
+                    <div class="summary-row">
+                        <span>Product Value</span>
+                        <span>{{ settings.currency_symbol }}{{ "%.2f"|format(bill["total"] - bill["tax_amount"]) }}</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>CGST @ {{ "%g"|format(bill["tax_rate"] / 2) }}%</span>
+                        <span>{{ settings.currency_symbol }}{{ "%.2f"|format(bill["tax_amount"] / 2) }}</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>SGST @ {{ "%g"|format(bill["tax_rate"] / 2) }}%</span>
+                        <span>{{ settings.currency_symbol }}{{ "%.2f"|format(bill["tax_amount"] / 2) }}</span>
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="summary-row total">
+
+                    <span>
+                        Grand Total
+                    </span>
+
+                    <span>
+                        {{ settings.currency_symbol }}{{ "%.2f"|format(bill["total"]) }}
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <!-- FOOTER -->
+
+            <div class="invoice-footer">
+
+                <div class="thank-you">
+                    {{ settings.invoice_footer or "Thank you for your business!" }}
+                </div>
+
+                Please retain this invoice for your records.
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+{% if settings.auto_print %}
+<script>
+    window.addEventListener("load", function () {
+        setTimeout(function () { window.print(); }, 400);
+    });
+</script>
+{% endif %}
+
+
+<script src="{{ url_for('static', filename='html2pdf.min.js') }}"></script>
+<script>
+function downloadPDF() {
+    var element = document.getElementById('invoiceContent');
+    var billNum = "{{ bill['bill_number'] }}";
+    var opt = {
+        margin:       [10, 10, 10, 10],
+        filename:     'Invoice-' + billNum + '.pdf',
+        image:        { type: 'jpeg', quality: 1.0 },
+        html2canvas:  { scale: 4, useCORS: true },
+        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+    html2pdf().set(opt).from(element).save();
+}
+
+async function goBackToCart() {
+    if (!confirm("Go back to Cart to edit this bill?\n\nThis will cancel this bill, restore stock to inventory, and load all items back into your cart so you can make changes.")) {
+        return;
+    }
+
+    try {
+        // 1. Fetch bill items via API
+        const itemRes = await fetch("/api/bills/{{ bill['id'] }}/items", {
+            credentials: "same-origin"
+        });
+        const itemData = await itemRes.json();
+
+        if (!itemRes.ok) {
+            alert(itemData.error || "Failed to load bill items.");
+            return;
+        }
+
+        // 2. Delete the bill (which returns stock to inventory)
+        const delRes = await fetch("/api/bills/{{ bill['id'] }}", {
+            method: "DELETE",
+            credentials: "same-origin"
+        });
+
+        if (!delRes.ok) {
+            const err = await delRes.json();
+            alert("Error cancelling bill: " + (err.error || "Failed"));
+            return;
+        }
+
+        // 3. Format items for cart
+        const cartItems = (itemData.items || []).map(item => ({
+            id: Date.now() + Math.random(),
+            productId: item.product_id,
+            productName: item.product_name,
+            billingName: item.product_name,
+            quantity: Number(item.quantity),
+            unit: item.quantity_unit,
+            baseQuantity: Number(item.base_quantity),
+            price: Number(item.price),
+            originalPrice: Number(item.price),
+            discountPercent: Number(item.discount_percent || 0),
+            priceBasis: item.price_basis,
+            total: Number(item.total)
+        }));
+
+        sessionStorage.setItem("restore_cart", JSON.stringify({
+            items: cartItems,
+            customer_name: itemData.bill ? itemData.bill.customer_name : "",
+            customer_phone: itemData.bill ? itemData.bill.customer_phone : "",
+            payment_method: itemData.bill ? itemData.bill.payment_method : "Cash",
+            discount_percent: itemData.bill ? (itemData.bill.discount_percent || 0) : 0,
+            flat_discount: itemData.bill ? (itemData.bill.flat_discount || 0) : 0
+        }));
+
+        window.location.href = "/billing";
+    } catch (e) {
+        alert("Error: " + e.message);
+    }
+}
+
+async function deleteThisBill() {
+    if (!confirm("Are you sure you want to delete bill {{ bill['bill_number'] }}?\n\nAll items in this bill will be returned to stock.")) {
+        return;
+    }
+
+    try {
+        const response = await fetch("/api/bills/{{ bill['id'] }}", {
+            method: "DELETE",
+            credentials: "same-origin"
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            alert(data.error || "Failed to delete bill.");
+            return;
+        }
+
+        alert("Bill {{ bill['bill_number'] }} deleted and stock restored successfully.");
+        window.location.href = "/bill-history";
+    } catch (e) {
+        alert("Error: " + e.message);
+    }
+}
+</script>
+</body>
+
+</html>

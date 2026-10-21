@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Cloud Billing</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .login-card {
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 420px;
+            padding: 32px 28px;
+            margin: 30px auto;
+        }
+        .login-tabs {
+            display: flex;
+            background: #f3f4f6;
+            border-radius: 10px;
+            padding: 4px;
+            margin-bottom: 22px;
+            gap: 4px;
+        }
+        .login-tab {
+            flex: 1;
+            padding: 8px 12px;
+            border: none;
+            background: transparent;
+            font-size: 13px;
+            font-weight: 600;
+            color: #6b7280;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+        .login-tab.active {
+            background: #ffffff;
+            color: #111827;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .input-group {
+            margin-bottom: 16px;
+            text-align: left;
+        }
+        .input-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 6px;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+        }
+        .input-group input:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+        }
+        .error-banner {
+            background: #fee2e2;
+            color: #b91c1c;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-bottom: 18px;
+            border: 1px solid #fecaca;
+        }
+    </style>
+</head>
+<body class="login-page">
+
+<div class="login-card">
+    <div class="logo" style="margin-bottom: 20px;">
+        <div class="logo-icon" style="background:#2563eb; color:white; width:48px; height:48px; border-radius:12px; display:inline-flex; align-items:center; justify-content:center; font-weight:800; font-size:20px; margin-bottom:8px;">
+            ⚡
+        </div>
+        <h1 style="font-size: 22px; font-weight: 800; color: #111827; margin: 0 0 4px 0;">Cloud Billing</h1>
+        <p style="color: #6b7280; font-size: 13px; margin: 0;">Sign in to access your store</p>
+    </div>
+
+    <!-- TABS: Owner vs Staff -->
+    <div class="login-tabs">
+        <button type="button" class="login-tab {{ 'active' if login_type != 'staff' else '' }}" onclick="switchTab('owner')">
+            👑 Store Owner
+        </button>
+        <button type="button" class="login-tab {{ 'active' if login_type == 'staff' else '' }}" onclick="switchTab('staff')">
+            🧑‍💼 Staff / Cashier
+        </button>
+    </div>
+
+    {% if error %}
+    <div class="error-banner">
+        ⚠️ {{ error }}
+    </div>
+    {% endif %}
+
+    <!-- OWNER FORM -->
+    <form id="ownerForm" method="POST" action="/login" style="{{ 'display:none;' if login_type == 'staff' else '' }}">
+        <input type="hidden" name="login_type" value="owner">
+
+        <div class="input-group">
+            <label for="owner_identifier">Mobile Number, Email or Username</label>
+            <input type="text" id="owner_identifier" name="identifier" placeholder="e.g. 9876543210 or store@gmail.com" value="{{ identifier or '' }}" required autofocus>
+        </div>
+
+        <div class="input-group">
+            <label for="owner_password">Password</label>
+            <input type="password" id="owner_password" name="password" placeholder="Enter password" required>
+        </div>
+
+        <button type="submit" class="primary-button" style="width: 100%; padding: 11px; font-size: 15px; font-weight: 700; border-radius: 8px; cursor: pointer; margin-top: 6px;">
+            Sign In as Owner
+        </button>
+    </form>
+
+    <!-- STAFF FORM -->
+    <form id="staffForm" method="POST" action="/login" style="{{ '' if login_type == 'staff' else 'display:none;' }}">
+        <input type="hidden" name="login_type" value="staff">
+
+        <div class="input-group">
+            <label for="staff_store_code">Store Code *</label>
+            <input type="text" id="staff_store_code" name="store_code" placeholder="e.g. FRESHMART" style="text-transform:uppercase;" value="{{ store_code or '' }}" required>
+            <small style="color: #9ca3af; font-size: 11px; margin-top: 4px; display: block;">Ask your store manager/owner for the store code.</small>
+        </div>
+
+        <div class="input-group">
+            <label for="staff_username">Staff Username *</label>
+            <input type="text" id="staff_username" name="username" placeholder="e.g. cashier1" value="{{ username or '' }}" required>
+        </div>
+
+        <div class="input-group">
+            <label for="staff_password">Staff Password *</label>
+            <input type="password" id="staff_password" name="password" placeholder="Enter password" required>
+        </div>
+
+        <button type="submit" class="primary-button" style="width: 100%; padding: 11px; font-size: 15px; font-weight: 700; border-radius: 8px; cursor: pointer; margin-top: 6px;">
+            Sign In to Billing Desk
+        </button>
+    </form>
+
+    <div style="margin-top: 24px; text-align: center; font-size: 14px; color: #6b7280; border-top: 1px solid #e5e7eb; padding-top: 18px;">
+        New shop owner? 
+        <a href="/register" style="color: #2563eb; font-weight: 700; text-decoration: underline; font-size: 14px;">Register</a>
+        <div style="margin-top: 8px;">
+            <a href="/register" style="display: inline-block; background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; text-decoration: none;">
+                ✨ Start 14-Day Free Trial
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+    function switchTab(type) {
+        const ownerForm = document.getElementById("ownerForm");
+        const staffForm = document.getElementById("staffForm");
+        const tabs = document.querySelectorAll(".login-tab");
+
+        if (type === "staff") {
+            ownerForm.style.display = "none";
+            staffForm.style.display = "block";
+            tabs[0].classList.remove("active");
+            tabs[1].classList.add("active");
+            document.getElementById("staff_store_code").focus();
+        } else {
+            ownerForm.style.display = "block";
+            staffForm.style.display = "none";
+            tabs[0].classList.add("active");
+            tabs[1].classList.remove("active");
+            document.getElementById("owner_identifier").focus();
+        }
+    }
+</script>
+
+</body>
+</html>

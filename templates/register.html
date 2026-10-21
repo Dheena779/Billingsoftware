@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Store - Cloud Billing</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .register-card {
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 460px;
+            padding: 36px 32px;
+            margin: 20px auto;
+        }
+        .badge-free {
+            display: inline-block;
+            background: #dcfce7;
+            color: #15803d;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 20px;
+            margin-bottom: 12px;
+            letter-spacing: 0.5px;
+        }
+        .input-group {
+            margin-bottom: 16px;
+            text-align: left;
+        }
+        .input-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 6px;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+        }
+        .input-group input:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+        }
+        .error-banner {
+            background: #fee2e2;
+            color: #b91c1c;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-bottom: 18px;
+            border: 1px solid #fecaca;
+        }
+    </style>
+</head>
+<body class="login-page">
+
+<div class="register-card">
+    <div class="logo" style="margin-bottom: 24px;">
+        <span class="badge-free">✨ 14-DAY FREE TRIAL</span>
+        <h1 style="font-size: 22px; font-weight: 800; color: #111827; margin: 0 0 6px 0;">Create Your Store</h1>
+        <p style="color: #6b7280; font-size: 14px; margin: 0;">Start managing your billing and inventory online in 30 seconds</p>
+    </div>
+
+    {% if error %}
+    <div class="error-banner">
+        ⚠️ {{ error }}
+    </div>
+    {% endif %}
+
+    <form method="POST" action="/register">
+        <div class="input-group">
+            <label for="store_name">Store / Business Name *</label>
+            <input type="text" id="store_name" name="store_name" placeholder="e.g. FreshMart Grocery" value="{{ store_name or '' }}" required autofocus>
+        </div>
+
+        <div class="input-group">
+            <label for="business_category">Business Type / Category</label>
+            <select id="business_category" name="business_category" style="width: 100%; padding: 10px 14px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; box-sizing: border-box; background: white; color: #111827;">
+                <option value="Grocery / Supermarket" {% if business_category == 'Grocery / Supermarket' %}selected{% endif %}>🛒 Grocery / Supermarket</option>
+                <option value="Retail Store" {% if business_category == 'Retail Store' %}selected{% endif %}>🛍️ Retail Store</option>
+                <option value="Clothing & Apparel" {% if business_category == 'Clothing & Apparel' %}selected{% endif %}>👕 Clothing &amp; Apparel</option>
+                <option value="Electronics & Mobile" {% if business_category == 'Electronics & Mobile' %}selected{% endif %}>📱 Electronics &amp; Mobile</option>
+                <option value="Pharmacy & Medical" {% if business_category == 'Pharmacy & Medical' %}selected{% endif %}>💊 Pharmacy &amp; Medical</option>
+                <option value="Bakery & Cafe" {% if business_category == 'Bakery & Cafe' %}selected{% endif %}>☕ Restaurant / Bakery / Cafe</option>
+                <option value="Hardware & Sanitary" {% if business_category == 'Hardware & Sanitary' %}selected{% endif %}>🔧 Hardware &amp; Electrical</option>
+                <option value="Other" {% if business_category == 'Other' %}selected{% endif %}>🏢 Other Business</option>
+            </select>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="input-group">
+                <label for="city">City / Town</label>
+                <input type="text" id="city" name="city" placeholder="e.g. Chennai, Vellore" value="{{ city or '' }}">
+            </div>
+            <div class="input-group">
+                <label for="state">State</label>
+                <input type="text" id="state" name="state" placeholder="e.g. Tamil Nadu" value="{{ state or '' }}">
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label for="address">Store Address <span style="font-weight:400; color:#9ca3af;">(optional)</span></label>
+            <input type="text" id="address" name="address" placeholder="e.g. 12/4 Bazaar Street" value="{{ address or '' }}">
+        </div>
+
+        <div class="input-group">
+            <label for="owner_name">Your Name (Owner) *</label>
+            <input type="text" id="owner_name" name="owner_name" placeholder="e.g. Rajesh Kumar" value="{{ owner_name or '' }}" required>
+        </div>
+
+        <div class="input-group">
+            <label for="email_or_phone">Mobile Number or Email *</label>
+            <input type="text" id="email_or_phone" name="email_or_phone" placeholder="e.g. 9876543210 or store@gmail.com" value="{{ email_or_phone or '' }}" required>
+            <small style="color: #9ca3af; font-size: 11px; margin-top: 4px; display: block;">You will use this to log in as Store Owner.</small>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="input-group">
+                <label for="password">Password *</label>
+                <input type="password" id="password" name="password" placeholder="At least 4 chars" required minlength="4">
+            </div>
+
+            <div class="input-group">
+                <label for="confirm_password">Confirm Password *</label>
+                <input type="password" id="confirm_password" name="confirm_password" placeholder="Re-type password" required minlength="4">
+            </div>
+        </div>
+
+        <button type="submit" class="primary-button" style="width: 100%; padding: 12px; font-size: 15px; font-weight: 700; border-radius: 8px; cursor: pointer; margin-top: 8px;">
+            🚀 Create Store & Start Free Trial
+        </button>
+    </form>
+
+    <div style="margin-top: 24px; text-align: center; font-size: 13px; color: #6b7280; border-top: 1px solid #e5e7eb; padding-top: 18px;">
+        Already have a store account? 
+        <a href="/login" style="color: #2563eb; font-weight: 600; text-decoration: none;">Login here</a>
+    </div>
+</div>
+
+</body>
+</html>
