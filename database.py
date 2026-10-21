@@ -1,6 +1,7 @@
 import sqlite3
 import os
 import re
+import secrets
 from datetime import datetime, timedelta
 from werkzeug.security import generate_password_hash
 
@@ -57,6 +58,28 @@ def initialize_database():
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_stores_code ON stores(store_code)")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_stores_email ON stores(owner_email)")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_stores_phone ON stores(owner_phone)")
+
+    # =========================
+    # LICENSE KEYS (Single-Use, Store-Unique)
+    # =========================
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS license_keys (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            key_code TEXT UNIQUE NOT NULL,
+            duration_minutes INTEGER DEFAULT 30,
+            price REAL DEFAULT 5.0,
+            plan_name TEXT DEFAULT 'Test Pro (30 Mins)',
+            is_used INTEGER DEFAULT 0,
+            used_by_store_id INTEGER,
+            used_by_store_code TEXT,
+            used_at TIMESTAMP,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (used_by_store_id) REFERENCES stores(id)
+        )
+    """)
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_license_keys_code ON license_keys(key_code)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_license_keys_store ON license_keys(used_by_store_id)")
 
     # =========================
     # USERS
@@ -737,8 +760,8 @@ def register_new_store(store_name, owner_name, email_or_phone, password, city=""
             attempt += 1
             store_code = f"{clean_code}{attempt}"
 
-        # 14-day trial
-        trial_ends = (datetime.now() + timedelta(days=14)).strftime("%Y-%m-%d %H:%M:%S")
+        # 5-minute testing trial (as requested for instant verification)
+        trial_ends = (datetime.now() + timedelta(minutes=5)).strftime("%Y-%m-%d %H:%M:%S")
 
         cur = conn.execute("""
             INSERT INTO stores (
@@ -782,3 +805,338 @@ def register_new_store(store_name, owner_name, email_or_phone, password, city=""
         raise e
     finally:
         conn.close()
+
+
+def get_store_subscription(store_id):
+    """
+    Check subscription and trial status for a store.
+    Supports minute-level precision for testing (5 min trial, 30 min Pro).
+    Returns dict:
+      is_active: bool
+      plan_status: 'trial' | 'active' | 'expired'
+      seconds_left: int
+      minutes_left: int
+      days_left: int
+      time_left_str: str (e.g. '4m 32s', '28m 10s', '12 days')
+      expires_at: str (e.g. '21 Oct 2026, 09:15 PM')
+      store_code: str
+      store_name: str
+    """
+    if not store_id:
+        return {
+            "is_active": False,
+            "plan_status": "expired",
+            "seconds_left": 0,
+            "minutes_left": 0,
+            "days_left": 0,
+            "time_left_str": "Expired",
+            "expires_at": None,
+            "store_code": "",
+            "store_name": ""
+        }
+
+    conn = get_connection()
+    try:
+        store = conn.execute(
+            "SELECT id, store_code, store_name, plan_status, trial_ends_at, subscription_ends_at FROM stores WHERE id = ?",
+            (store_id,)
+        ).fetchone()
+
+        if not store:
+            return {
+                "is_active": False,
+                "plan_status": "expired",
+                "seconds_left": 0,
+                "minutes_left": 0,
+                "days_left": 0,
+                "time_left_str": "Expired",
+                "expires_at": None,
+                "store_code": "",
+                "store_name": ""
+            }
+
+        now = datetime.now()
+        plan_status = store["plan_status"] or "trial"
+        trial_ends = None
+        sub_ends = None
+
+        if store["trial_ends_at"]:
+            try:
+                trial_ends = datetime.strptime(str(store["trial_ends_at"])[:19], "%Y-%m-%d %H:%M:%S")
+            except Exception:
+                pass
+
+        if store["subscription_ends_at"]:
+            try:
+                sub_ends = datetime.strptime(str(store["subscription_ends_at"])[:19], "%Y-%m-%d %H:%M:%S")
+            except Exception:
+                pass
+
+        def calc_remaining(target_dt):
+            diff = int((target_dt - now).total_seconds())
+            if diff <= 0:
+                return 0, 0, 0, "Expired"
+            days = diff // 86400
+            mins = diff // 60
+            secs = diff % 60
+            if diff < 3600:
+                time_str = f"{mins}m {secs}s"
+            elif diff < 86400:
+                hours = diff // 3600
+                rem_mins = (diff % 3600) // 60
+                time_str = f"{hours}h {rem_mins}m"
+            else:
+                time_str = f"{days} days"
+            return diff, mins, days, time_str
+
+        # Case 1: Active Pro Subscription
+        if plan_status == "active":
+            if sub_ends:
+                sec_left, mins_left, days_left, time_str = calc_remaining(sub_ends)
+                if sec_left <= 0:
+                    conn.execute("UPDATE stores SET plan_status = 'expired' WHERE id = ?", (store_id,))
+                    conn.commit()
+                    return {
+                        "is_active": False,
+                        "plan_status": "expired",
+                        "seconds_left": 0,
+                        "minutes_left": 0,
+                        "days_left": 0,
+                        "time_left_str": "Expired",
+                        "expires_at": sub_ends.strftime("%d %b %Y, %I:%M %p"),
+                        "store_code": store["store_code"],
+                        "store_name": store["store_name"]
+                    }
+                else:
+                    return {
+                        "is_active": True,
+                        "plan_status": "active",
+                        "seconds_left": sec_left,
+                        "minutes_left": mins_left,
+                        "days_left": days_left,
+                        "time_left_str": time_str,
+                        "expires_at": sub_ends.strftime("%d %b %Y, %I:%M %p"),
+                        "store_code": store["store_code"],
+                        "store_name": store["store_name"]
+                    }
+            else:
+                return {
+                    "is_active": True,
+                    "plan_status": "active",
+                    "seconds_left": 99999999,
+                    "minutes_left": 999999,
+                    "days_left": 999,
+                    "time_left_str": "Lifetime",
+                    "expires_at": "Lifetime Pro",
+                    "store_code": store["store_code"],
+                    "store_name": store["store_name"]
+                }
+
+        # Case 2: Free Trial (5 minutes)
+        if plan_status == "trial":
+            if trial_ends:
+                sec_left, mins_left, days_left, time_str = calc_remaining(trial_ends)
+                if sec_left <= 0:
+                    conn.execute("UPDATE stores SET plan_status = 'expired' WHERE id = ?", (store_id,))
+                    conn.commit()
+                    return {
+                        "is_active": False,
+                        "plan_status": "expired",
+                        "seconds_left": 0,
+                        "minutes_left": 0,
+                        "days_left": 0,
+                        "time_left_str": "Expired",
+                        "expires_at": trial_ends.strftime("%d %b %Y, %I:%M %p"),
+                        "store_code": store["store_code"],
+                        "store_name": store["store_name"]
+                    }
+                else:
+                    return {
+                        "is_active": True,
+                        "plan_status": "trial",
+                        "seconds_left": sec_left,
+                        "minutes_left": mins_left,
+                        "days_left": days_left,
+                        "time_left_str": time_str,
+                        "expires_at": trial_ends.strftime("%d %b %Y, %I:%M %p"),
+                        "store_code": store["store_code"],
+                        "store_name": store["store_name"]
+                    }
+            else:
+                return {
+                    "is_active": True,
+                    "plan_status": "trial",
+                    "seconds_left": 300,
+                    "minutes_left": 5,
+                    "days_left": 0,
+                    "time_left_str": "5m 00s",
+                    "expires_at": "In 5 Minutes",
+                    "store_code": store["store_code"],
+                    "store_name": store["store_name"]
+                }
+
+        # Case 3: Already expired
+        exp_target = sub_ends or trial_ends or now
+        return {
+            "is_active": False,
+            "plan_status": "expired",
+            "seconds_left": 0,
+            "minutes_left": 0,
+            "days_left": 0,
+            "time_left_str": "Expired",
+            "expires_at": exp_target.strftime("%d %b %Y, %I:%M %p"),
+            "store_code": store["store_code"],
+            "store_name": store["store_name"]
+        }
+    finally:
+        conn.close()
+
+
+def generate_license_key(duration_minutes=30, price=5.0, plan_name="Test Pro (30 Mins)"):
+    """
+    Generates a cryptographically unique license key and saves it as unused.
+    Format: PRO-30M-XXXX-XXXX
+    """
+    conn = get_connection()
+    try:
+        while True:
+            t1 = secrets.token_hex(2).upper()
+            t2 = secrets.token_hex(2).upper()
+            prefix = "PRO-30M" if duration_minutes == 30 else f"PRO-{duration_minutes}M"
+            key_code = f"{prefix}-{t1}-{t2}"
+            exists = conn.execute("SELECT id FROM license_keys WHERE UPPER(key_code) = ?", (key_code,)).fetchone()
+            if not exists:
+                break
+
+        conn.execute("""
+            INSERT INTO license_keys (key_code, duration_minutes, price, plan_name, is_used)
+            VALUES (?, ?, ?, ?, 0)
+        """, (key_code, duration_minutes, price, plan_name))
+        conn.commit()
+        return key_code
+    finally:
+        conn.close()
+
+
+def redeem_license_key(key_code, store_id):
+    """
+    Redeems a license key strictly for a single store account.
+    If the key is already used, it CANNOT be redeemed again by anyone.
+    """
+    if not key_code or not store_id:
+        return False, "License key and store account are required."
+
+    clean_key = str(key_code).strip().upper()
+    conn = get_connection()
+    try:
+        key_row = conn.execute(
+            "SELECT id, key_code, duration_minutes, price, plan_name, is_used, used_by_store_id, used_by_store_code FROM license_keys WHERE UPPER(key_code) = ?",
+            (clean_key,)
+        ).fetchone()
+
+        if not key_row:
+            return False, "Invalid license key. Please check the code or contact founder Dheena (+91 7502399148)."
+
+        if key_row["is_used"] == 1:
+            if key_row["used_by_store_id"] == store_id:
+                return False, "This license key has already been activated on your store account."
+            else:
+                return False, "This license key has already been used by another store. Every key is strictly single-use only."
+
+        store = conn.execute("SELECT id, store_code, store_name, subscription_ends_at FROM stores WHERE id = ?", (store_id,)).fetchone()
+        if not store:
+            return False, "Store account not found."
+
+        now = datetime.now()
+        base_time = now
+        if store["subscription_ends_at"]:
+            try:
+                curr_end = datetime.strptime(str(store["subscription_ends_at"])[:19], "%Y-%m-%d %H:%M:%S")
+                if curr_end > now:
+                    base_time = curr_end
+            except Exception:
+                pass
+
+        duration_mins = key_row["duration_minutes"] or 30
+        new_end = (base_time + timedelta(minutes=duration_mins)).strftime("%Y-%m-%d %H:%M:%S")
+
+        # Mark key used permanently
+        conn.execute("""
+            UPDATE license_keys 
+            SET is_used = 1, used_by_store_id = ?, used_by_store_code = ?, used_at = ?
+            WHERE id = ?
+        """, (store["id"], store["store_code"], now.strftime("%Y-%m-%d %H:%M:%S"), key_row["id"]))
+
+        # Extend store subscription
+        conn.execute("""
+            UPDATE stores 
+            SET plan_status = 'active', subscription_ends_at = ?
+            WHERE id = ?
+        """, (new_end, store["id"]))
+
+        conn.commit()
+        return True, f"Pro unlocked successfully! Valid for {duration_mins} minutes until {new_end}."
+    except Exception as e:
+        conn.rollback()
+        return False, f"Failed to activate key: {str(e)}"
+    finally:
+        conn.close()
+
+
+def process_test_payment(store_id, amount=5.0, duration_minutes=30):
+    """
+    Processes ₹5 test payment for 30 minutes of Pro access.
+    Generates a unique license key, saves it, redeems it for this store,
+    and returns (success, key_code, message).
+    """
+    conn = get_connection()
+    try:
+        store = conn.execute("SELECT id, store_code, store_name FROM stores WHERE id = ?", (store_id,)).fetchone()
+        if not store:
+            return False, None, "Store account not found."
+
+        # 1. Generate unique single-use key
+        key_code = generate_license_key(duration_minutes=duration_minutes, price=amount, plan_name="Test Pro (30 Mins)")
+
+        # 2. Redeem it for this store
+        success, msg = redeem_license_key(key_code, store_id)
+        return success, key_code, msg
+    finally:
+        conn.close()
+
+
+def activate_store_subscription(store_id_or_code, duration_minutes=30):
+    """
+    Activates or extends a store's Pro subscription by duration_minutes.
+    """
+    conn = get_connection()
+    try:
+        if isinstance(store_id_or_code, int) or str(store_id_or_code).isdigit():
+            store = conn.execute("SELECT id, store_code, subscription_ends_at FROM stores WHERE id = ?", (int(store_id_or_code),)).fetchone()
+        else:
+            code = str(store_id_or_code).strip().upper()
+            store = conn.execute("SELECT id, store_code, subscription_ends_at FROM stores WHERE UPPER(store_code) = ?", (code,)).fetchone()
+
+        if not store:
+            return False, "Store not found"
+
+        now = datetime.now()
+        base_time = now
+        if store["subscription_ends_at"]:
+            try:
+                curr_end = datetime.strptime(str(store["subscription_ends_at"])[:19], "%Y-%m-%d %H:%M:%S")
+                if curr_end > now:
+                    base_time = curr_end
+            except Exception:
+                pass
+
+        new_end = (base_time + timedelta(minutes=duration_minutes)).strftime("%Y-%m-%d %H:%M:%S")
+        conn.execute(
+            "UPDATE stores SET plan_status = 'active', subscription_ends_at = ? WHERE id = ?",
+            (new_end, store["id"])
+        )
+        conn.commit()
+        return True, f"Pro activated successfully until {new_end}"
+    finally:
+        conn.close()
+

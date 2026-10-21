@@ -8,7 +8,10 @@ from flask import Flask, render_template, request, redirect, session, jsonify, a
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from paths import RESOURCE_DIR
-from database import DATA_DIR, get_connection, initialize_database, register_new_store
+from database import (
+    DATA_DIR, get_connection, initialize_database, register_new_store,
+    get_store_subscription, generate_license_key, redeem_license_key, process_test_payment
+)
 from invoice import get_invoice_data
 from reports import reports_bp
 from settings import settings_bp, get_settings, format_datetime
@@ -77,27 +80,79 @@ APP_VERSION = "2.5"
 @app.context_processor
 def inject_branding():
 
-    try:
-        settings = get_settings()
-    except Exception:
-        return {
-            "store_name": "Billing",
-            "store_logo": "",
-            "app_version": f"v{APP_VERSION}",
-            "raw_version": APP_VERSION,
-        }
-
-    return {
-        "store_name": settings["store_name"] or "Billing",
-        "store_logo": settings["logo"] if settings["show_logo"] else "",
+    base_data = {
+        "store_name": "Billing",
+        "store_logo": "",
         "app_version": f"v{APP_VERSION}",
         "raw_version": APP_VERSION,
+        "sub_status": "trial",
+        "sub_active": True,
+        "sub_time_left": "",
+        "sub_code": "",
     }
+
+    try:
+        settings = get_settings()
+        base_data["store_name"] = settings["store_name"] or "Billing"
+        base_data["store_logo"] = settings["logo"] if settings["show_logo"] else ""
+    except Exception:
+        pass
+
+    store_id = session.get("store_id")
+    if store_id:
+        try:
+            sub = get_store_subscription(store_id)
+            base_data["sub_status"] = sub.get("plan_status", "trial")
+            base_data["sub_active"] = sub.get("is_active", True)
+            base_data["sub_time_left"] = sub.get("time_left_str", "")
+            base_data["sub_code"] = sub.get("store_code", "")
+        except Exception:
+            pass
+
+    return base_data
 
 
 @app.template_filter("local_datetime")
 def local_datetime_filter(value):
     return format_datetime(value)
+
+
+# ==================================================
+# SUBSCRIPTION & TRIAL LOCKOUT GATEWAY
+# ==================================================
+
+@app.before_request
+def check_subscription_expiration():
+    if not session.get("logged_in") or not session.get("store_id"):
+        return None
+
+    path = request.path
+    # Essential routes that must always be accessible
+    if (
+        path.startswith("/subscription") or
+        path.startswith("/about") or
+        path.startswith("/static") or
+        path.startswith("/logout") or
+        path.startswith("/api/subscription") or
+        path in ["/", "/login", "/register", "/staff-login"]
+    ):
+        return None
+
+    # Check store subscription status
+    try:
+        sub = get_store_subscription(session.get("store_id"))
+        if not sub.get("is_active", True):
+            if path.startswith("/api/"):
+                return jsonify({
+                    "success": False,
+                    "error": "Your trial or subscription has expired. Please activate Pro (₹5 for 30 mins) or contact founder Dheena (+91 7502399148).",
+                    "expired": True
+                }), 403
+            return redirect("/subscription?expired=1")
+    except Exception as e:
+        print("Subscription check error:", e)
+
+    return None
 
 
 # ==================================================
@@ -211,7 +266,7 @@ def is_setup_complete():
 @app.before_request
 def check_cloud_session():
     # Public routes that don't need login
-    public_routes = ["/", "/login", "/register", "/api/register"]
+    public_routes = ["/", "/login", "/register", "/api/register", "/about"]
     if request.path.startswith("/static") or request.path in public_routes:
         return
 
@@ -804,28 +859,27 @@ def setup():
 def get_store_license_info(store_id=None):
     sid = store_id or session.get("store_id")
     if not sid:
-        return {"status": "trial", "message": "Cloud Billing", "days_left": 14}
-    conn = get_connection()
-    store = conn.execute("SELECT plan_status, trial_ends_at, subscription_ends_at FROM stores WHERE id = ?", (sid,)).fetchone()
-    conn.close()
-    if not store:
-        return {"status": "trial", "message": "Cloud Billing", "days_left": 14}
+        return {"status": "trial", "message": "Cloud Billing", "days_left": 14, "is_active": True}
 
-    trial_ends = store["trial_ends_at"]
-    status = store["plan_status"] or "trial"
-    if status == "active":
-        return {"status": "active", "message": "⭐ Pro Cloud Subscription Active", "days_left": 365}
-    elif trial_ends:
-        try:
-            exp_date = datetime.strptime(trial_ends[:10], "%Y-%m-%d").date()
-            days_left = max(0, (exp_date - date.today()).days)
-            if days_left > 0:
-                return {"status": "trial", "message": f"Free Trial Active ({days_left} days remaining)", "days_left": days_left}
-            else:
-                return {"status": "expired", "message": "Trial Expired. Please upgrade to continue.", "days_left": 0}
-        except Exception:
-            pass
-    return {"status": "trial", "message": "Free Trial Active", "days_left": 14}
+    sub = get_store_subscription(sid)
+    if sub["plan_status"] == "active":
+        msg = f"⭐ Pro Cloud Active ({sub['time_left_str']} left)"
+    elif sub["plan_status"] == "trial":
+        msg = f"⚡ Free Trial Active ({sub['time_left_str']} left)"
+    else:
+        msg = "⚠️ Subscription Expired. Please activate Pro."
+
+    return {
+        "status": sub["plan_status"],
+        "message": msg,
+        "is_active": sub["is_active"],
+        "days_left": sub.get("days_left", 0),
+        "minutes_left": sub.get("minutes_left", 0),
+        "time_left_str": sub.get("time_left_str", ""),
+        "expires_at": sub.get("expires_at", ""),
+        "store_code": sub.get("store_code", ""),
+        "store_name": sub.get("store_name", "")
+    }
 
 
 # ==================================================
@@ -4084,6 +4138,126 @@ def get_bill_history():
     finally:
 
         conn.close()
+
+# ==================================================
+# ABOUT US
+# ==================================================
+
+@app.route("/about")
+def about_page():
+    return render_template("about.html")
+
+
+# ==================================================
+# PRO SUBSCRIPTION & LICENSE MANAGEMENT
+# ==================================================
+
+@app.route("/subscription")
+def subscription_page():
+    if not session.get("logged_in"):
+        return redirect("/login")
+
+    store_id = session.get("store_id")
+    sub = get_store_subscription(store_id)
+    return render_template(
+        "subscription.html",
+        plan_status=sub.get("plan_status", "trial"),
+        is_active=sub.get("is_active", False),
+        seconds_left=sub.get("seconds_left", 0),
+        minutes_left=sub.get("minutes_left", 0),
+        days_left=sub.get("days_left", 0),
+        time_left_str=sub.get("time_left_str", "0m 0s"),
+        expires_at=sub.get("expires_at", "Expired"),
+        store_code=sub.get("store_code", session.get("store_code", "")),
+        store_name=sub.get("store_name", session.get("store_name", "Your Store")),
+        expired_flag=request.args.get("expired") == "1"
+    )
+
+
+@app.route("/license")
+def license_redirect():
+    return redirect("/subscription")
+
+
+@app.route("/api/subscription/status")
+def api_subscription_status():
+    if not session.get("logged_in"):
+        return jsonify({"error": "Unauthorized"}), 401
+    store_id = session.get("store_id")
+    sub = get_store_subscription(store_id)
+    return jsonify({"success": True, "subscription": sub})
+
+
+@app.route("/api/subscription/pay-test", methods=["POST"])
+def api_subscription_pay_test():
+    """
+    Simulates ₹5 test payment for 30 minutes of Pro access.
+    Generates a unique license key, immediately redeems it for this store,
+    and returns the unique key to the user.
+    """
+    if not session.get("logged_in"):
+        return jsonify({"error": "Unauthorized"}), 401
+
+    store_id = session.get("store_id")
+    success, key_code, msg = process_test_payment(store_id, amount=5.0, duration_minutes=30)
+    if success:
+        sub = get_store_subscription(store_id)
+        return jsonify({
+            "success": True,
+            "key_code": key_code,
+            "message": msg,
+            "expires_at": sub.get("expires_at"),
+            "time_left_str": sub.get("time_left_str"),
+            "seconds_left": sub.get("seconds_left")
+        })
+    return jsonify({"success": False, "error": msg or "Payment processing failed"}), 400
+
+
+@app.route("/api/subscription/activate", methods=["POST"])
+def api_subscription_activate():
+    """
+    Redeems a single-use unique license key for this store.
+    Rejects keys already used by this or any other store.
+    """
+    if not session.get("logged_in"):
+        return jsonify({"error": "Unauthorized"}), 401
+
+    store_id = session.get("store_id")
+    data = request.get_json(silent=True) or {}
+    key = data.get("activation_key", "").strip()
+
+    if not key:
+        return jsonify({"success": False, "error": "Please enter a valid activation key."}), 400
+
+    success, msg = redeem_license_key(key, store_id)
+    if success:
+        sub = get_store_subscription(store_id)
+        return jsonify({
+            "success": True,
+            "message": msg,
+            "expires_at": sub.get("expires_at"),
+            "time_left_str": sub.get("time_left_str"),
+            "seconds_left": sub.get("seconds_left")
+        })
+    return jsonify({"success": False, "error": msg}), 400
+
+
+@app.route("/api/subscription/generate-key", methods=["POST"])
+def api_subscription_generate_key():
+    """
+    Generates a new, unused unique license key.
+    """
+    if not session.get("logged_in") or session.get("role") != "admin":
+        return jsonify({"error": "Unauthorized"}), 403
+
+    data = request.get_json(silent=True) or {}
+    duration = int(data.get("duration_minutes", 30))
+    price = float(data.get("price", 5.0))
+    plan_name = data.get("plan_name", f"{duration}-Minute Pro Access")
+
+    key_code = generate_license_key(duration_minutes=duration, price=price, plan_name=plan_name)
+    return jsonify({"success": True, "key_code": key_code, "duration_minutes": duration})
+
 
 # ==================================================
 # LOGOUT

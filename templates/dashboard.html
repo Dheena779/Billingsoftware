@@ -1734,12 +1734,12 @@
     <div class="content">
 
         {% if license_info %}
-        <div style="background: {% if license_info.status == 'trial' %}#fffbeb{% else %}#f0fdf4{% endif %}; border: 1px solid {% if license_info.status == 'trial' %}#fcd34d{% else %}#86efac{% endif %}; padding: 12px 18px; border-radius: 8px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center;">
-            <div style="font-size: 14px; font-weight: 600; color: {% if license_info.status == 'trial' %}#b45309{% else %}#166534{% endif %};">
-                {% if license_info.status == 'trial' %}⏳{% else %}✅{% endif %}
+        <div style="background: {% if license_info.status == 'trial' %}#fffbeb{% elif license_info.status == 'active' %}#f0fdf4{% else %}#fef2f2{% endif %}; border: 1px solid {% if license_info.status == 'trial' %}#fcd34d{% elif license_info.status == 'active' %}#86efac{% else %}#fca5a5{% endif %}; padding: 12px 18px; border-radius: 8px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-size: 14px; font-weight: 600; color: {% if license_info.status == 'trial' %}#b45309{% elif license_info.status == 'active' %}#166534{% else %}#991b1b{% endif %};">
+                {% if license_info.status == 'trial' %}⏳{% elif license_info.status == 'active' %}⭐{% else %}⚠️{% endif %}
                 {{ license_info.message }}
             </div>
-            <a href="/license" style="font-size: 13px; font-weight: 700; color: #4f46e5; text-decoration: none; padding: 6px 12px; background: white; border: 1px solid #c7d2fe; border-radius: 6px;">Manage License</a>
+            <a href="/subscription" style="font-size: 13px; font-weight: 700; color: #2563eb; text-decoration: none; padding: 6px 14px; background: white; border: 1px solid #bfdbfe; border-radius: 6px;">Manage Subscription &amp; Pro</a>
         </div>
         {% endif %}
 
