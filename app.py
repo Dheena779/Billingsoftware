@@ -1,16 +1,19 @@
 import os
+import json
 import secrets
 import time
 from datetime import datetime, date
 from functools import wraps
 
+import razorpay
 from flask import Flask, render_template, request, redirect, session, jsonify, abort
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from paths import RESOURCE_DIR
 from database import (
     DATA_DIR, get_connection, initialize_database, register_new_store,
-    get_store_subscription, generate_license_key, redeem_license_key, process_test_payment
+    get_store_subscription, generate_license_key, redeem_license_key, process_test_payment,
+    record_payment_order, record_payment_success
 )
 from invoice import get_invoice_data
 from reports import reports_bp
@@ -131,9 +134,13 @@ def check_subscription_expiration():
     if (
         path.startswith("/subscription") or
         path.startswith("/about") or
+        path.startswith("/terms") or
+        path.startswith("/privacy") or
+        path.startswith("/refund") or
         path.startswith("/static") or
         path.startswith("/logout") or
         path.startswith("/api/subscription") or
+        path.startswith("/api/payment") or
         path in ["/", "/login", "/register", "/staff-login"]
     ):
         return None
@@ -266,7 +273,10 @@ def is_setup_complete():
 @app.before_request
 def check_cloud_session():
     # Public routes that don't need login
-    public_routes = ["/", "/login", "/register", "/api/register", "/about"]
+    public_routes = [
+        "/", "/login", "/register", "/api/register",
+        "/about", "/terms", "/privacy", "/refund", "/refund-policy"
+    ]
     if request.path.startswith("/static") or request.path in public_routes:
         return
 
@@ -4257,6 +4267,211 @@ def api_subscription_generate_key():
 
     key_code = generate_license_key(duration_minutes=duration, price=price, plan_name=plan_name)
     return jsonify({"success": True, "key_code": key_code, "duration_minutes": duration})
+
+
+# ==================================================
+# RAZORPAY PAYMENT GATEWAY INTEGRATION
+# ==================================================
+
+SUBSCRIPTION_PLANS = {
+    "test_30m": {
+        "name": "30-Minute Pro Access (Testing)",
+        "amount_paise": 500,     # ₹5.00
+        "price_rupees": 5.0,
+        "duration_minutes": 30
+    },
+    "monthly": {
+        "name": "Monthly Pro Plan",
+        "amount_paise": 49900,   # ₹499.00
+        "price_rupees": 499.0,
+        "duration_minutes": 30 * 24 * 60  # 43200 minutes (30 days)
+    },
+    "annual": {
+        "name": "Annual Pro Plan (1 Year)",
+        "amount_paise": 499900,  # ₹4,999.00
+        "price_rupees": 4999.0,
+        "duration_minutes": 365 * 24 * 60 # 525600 minutes (365 days)
+    }
+}
+
+
+def get_razorpay_client():
+    """
+    Returns (razorpay.Client, key_id) or (None, "") if not configured.
+    Loads from environment variables or data/razorpay.json.
+    """
+    key_id = os.environ.get("RAZORPAY_KEY_ID", "").strip()
+    key_secret = os.environ.get("RAZORPAY_KEY_SECRET", "").strip()
+
+    cfg_file = os.path.join(DATA_DIR, "razorpay.json")
+    if os.path.exists(cfg_file):
+        try:
+            with open(cfg_file, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                key_id = key_id or data.get("key_id", "").strip()
+                key_secret = key_secret or data.get("key_secret", "").strip()
+        except Exception:
+            pass
+
+    if key_id and key_secret:
+        try:
+            client = razorpay.Client(auth=(key_id, key_secret))
+            return client, key_id
+        except Exception as e:
+            print("Error initializing Razorpay client:", e)
+            return None, ""
+    return None, key_id
+
+
+@app.route("/api/payment/create-order", methods=["POST"])
+def api_payment_create_order():
+    """
+    Creates a Razorpay Order for online payment.
+    """
+    if not session.get("logged_in"):
+        return jsonify({"error": "Unauthorized"}), 401
+
+    store_id = session.get("store_id")
+    data = request.get_json(silent=True) or {}
+    plan_key = data.get("plan_type", "test_30m")
+
+    if plan_key not in SUBSCRIPTION_PLANS:
+        return jsonify({"success": False, "error": "Invalid subscription plan selected."}), 400
+
+    plan = SUBSCRIPTION_PLANS[plan_key]
+    client, key_id = get_razorpay_client()
+
+    if not client or not key_id:
+        return jsonify({
+            "success": False,
+            "error": "Razorpay API keys not yet configured. Please add your Key ID and Secret in data/razorpay.json or contact founder Dheena (+91 7502399148).",
+            "keys_missing": True
+        }), 400
+
+    conn = get_connection()
+    store = conn.execute("SELECT store_code, store_name, owner_name, owner_email, owner_phone FROM stores WHERE id = ?", (store_id,)).fetchone()
+    conn.close()
+
+    receipt_id = f"rcpt_{store_id}_{int(time.time())}"[:40]
+
+    try:
+        order = client.order.create({
+            "amount": plan["amount_paise"],
+            "currency": "INR",
+            "receipt": receipt_id,
+            "notes": {
+                "store_id": str(store_id),
+                "store_code": store["store_code"] if store else "",
+                "plan_name": plan["name"]
+            }
+        })
+
+        # Record initiated order in DB
+        record_payment_order(
+            store_id=store_id,
+            order_id=order["id"],
+            amount=plan["price_rupees"],
+            plan_name=plan["name"],
+            duration_minutes=plan["duration_minutes"]
+        )
+
+        return jsonify({
+            "success": True,
+            "order_id": order["id"],
+            "amount": order["amount"],
+            "currency": "INR",
+            "key_id": key_id,
+            "plan_name": plan["name"],
+            "store_name": store["store_name"] if store else session.get("store_name", ""),
+            "owner_name": store["owner_name"] if store else session.get("owner_name", ""),
+            "owner_email": store["owner_email"] if store else "",
+            "owner_phone": store["owner_phone"] if store else ""
+        })
+    except Exception as e:
+        print("Razorpay order creation error:", e)
+        return jsonify({"success": False, "error": f"Failed to create payment order: {str(e)}"}), 500
+
+
+@app.route("/api/payment/verify", methods=["POST"])
+def api_payment_verify():
+    """
+    Verifies Razorpay payment signature and automatically issues a unique, single-use license key.
+    """
+    if not session.get("logged_in"):
+        return jsonify({"error": "Unauthorized"}), 401
+
+    store_id = session.get("store_id")
+    data = request.get_json(silent=True) or {}
+
+    order_id = data.get("razorpay_order_id")
+    payment_id = data.get("razorpay_payment_id")
+    signature = data.get("razorpay_signature")
+    plan_key = data.get("plan_type", "test_30m")
+
+    if not order_id or not payment_id or not signature:
+        return jsonify({"success": False, "error": "Incomplete payment verification payload."}), 400
+
+    plan = SUBSCRIPTION_PLANS.get(plan_key, SUBSCRIPTION_PLANS["test_30m"])
+    client, _ = get_razorpay_client()
+
+    if not client:
+        return jsonify({"success": False, "error": "Payment gateway client unavailable."}), 500
+
+    try:
+        # Cryptographic HMAC SHA256 verification
+        client.utility.verify_payment_signature({
+            "razorpay_order_id": order_id,
+            "razorpay_payment_id": payment_id,
+            "razorpay_signature": signature
+        })
+    except Exception as e:
+        print("Razorpay signature verification failed:", e)
+        return jsonify({"success": False, "error": "Payment verification signature mismatch. Security check failed."}), 400
+
+    # Payment is authentically verified!
+    # 1. Generate strictly unique license key
+    key_code = generate_license_key(
+        duration_minutes=plan["duration_minutes"],
+        price=plan["price_rupees"],
+        plan_name=plan["name"]
+    )
+
+    # 2. Redeem it immediately for this store account
+    redeem_ok, msg = redeem_license_key(key_code, store_id)
+
+    # 3. Mark payment as paid in database
+    record_payment_success(order_id, payment_id, signature, key_code, method="razorpay")
+
+    sub = get_store_subscription(store_id)
+
+    return jsonify({
+        "success": True,
+        "key_code": key_code,
+        "payment_id": payment_id,
+        "message": f"Payment of ₹{plan['price_rupees']} received! {plan['name']} unlocked successfully.",
+        "expires_at": sub.get("expires_at"),
+        "time_left_str": sub.get("time_left_str")
+    })
+
+
+# ==================================================
+# LEGAL & COMPLIANCE PAGES (Required by Razorpay)
+# ==================================================
+
+@app.route("/terms")
+def terms_page():
+    return render_template("terms.html")
+
+
+@app.route("/privacy")
+def privacy_page():
+    return render_template("privacy.html")
+
+
+@app.route("/refund")
+@app.route("/refund-policy")
+def refund_page():
+    return render_template("refund.html")
 
 
 # ==================================================

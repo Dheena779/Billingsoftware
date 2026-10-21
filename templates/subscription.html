@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Activate Pro Subscription - Cloud Billing</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <style>
         .sub-container {
             max-width: 860px;
@@ -219,20 +220,28 @@
     <div class="test-pass-box">
         <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 14px;">
             <div>
-                <span style="background: #b45309; color: white; font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.5px;">⚡ Instant Testing Mode</span>
+                <span style="background: #b45309; color: white; font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.5px;">⚡ Instant Testing Pass</span>
                 <h3 style="font-size: 22px; font-weight: 900; color: #78350f; margin: 8px 0 4px 0;">30-Minute Pro Access (₹5 Only)</h3>
-                <p style="margin: 0; color: #92400e; font-size: 14px; max-width: 560px;">
-                    Test the complete payment flow, key generation, and cloud features! Generates a <strong>strictly unique, single-use license key</strong> tied to your store account and unlocks full Pro access for 30 minutes.
+                <p style="margin: 0; color: #92400e; font-size: 14px; max-width: 540px;">
+                    Pay ₹5 via <strong>Razorpay (UPI, GPay, PhonePe QR, Cards)</strong>. Automatically generates your <strong>strictly unique single-use license key</strong> and unlocks 30 minutes of Pro access.
                 </p>
             </div>
-            <div>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                <button 
+                    type="button" 
+                    id="rzpPay5Btn" 
+                    onclick="payWithRazorpay('test_30m')" 
+                    style="background: #2563eb; color: white; border: none; padding: 13px 22px; border-radius: 10px; font-size: 14px; font-weight: 800; cursor: pointer; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); transition: 0.2s;"
+                >
+                    💳 Pay ₹5 via Razorpay (UPI / Cards)
+                </button>
                 <button 
                     type="button" 
                     id="payTestBtn" 
                     onclick="payTestSubscription()" 
-                    style="background: #1e3a8a; color: white; border: none; padding: 14px 24px; border-radius: 12px; font-size: 15px; font-weight: 800; cursor: pointer; box-shadow: 0 4px 12px rgba(30, 58, 138, 0.3); transition: 0.2s;"
+                    style="background: #fff; color: #78350f; border: 1.5px solid #d97706; padding: 8px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer;"
                 >
-                    💳 Pay ₹5 (Get Unique Key &amp; 30 Mins Pro)
+                    ⚡ Instant Simulate ₹5 (No Gateway)
                 </button>
             </div>
         </div>
@@ -240,9 +249,9 @@
         <div id="testPayResult" style="display: none; margin-top: 20px; background: white; border: 2px solid #16a34a; border-radius: 12px; padding: 18px 20px;">
             <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
                 <div>
-                    <div style="font-size: 16px; font-weight: 800; color: #166534;">🎉 Payment Successful! ₹5 Received</div>
-                    <div style="font-size: 13px; color: #475569; margin-top: 2px;">
-                        Your store has been unlocked for 30 minutes. Below is your strictly unique, single-use license key:
+                    <div style="font-size: 16px; font-weight: 800; color: #166534;" id="payResultTitle">🎉 Payment Successful!</div>
+                    <div style="font-size: 13px; color: #475569; margin-top: 2px;" id="payResultSub">
+                        Your store has been unlocked. Below is your strictly unique, single-use license key:
                     </div>
                 </div>
                 <div style="display: flex; align-items: center; gap: 10px;">
@@ -251,7 +260,7 @@
                 </div>
             </div>
             <div style="margin-top: 10px; font-size: 12px; color: #64748b;">
-                ℹ️ <em>Note: This key is now tied to <strong>{{ store_name }}</strong> (Code: <code>{{ store_code }}</code>) and cannot be redeemed again by any other store.</em>
+                ℹ️ <em>Note: This key is tied to <strong>{{ store_name }}</strong> (Code: <code>{{ store_code }}</code>) and cannot be redeemed again by any other store.</em>
             </div>
         </div>
     </div>
@@ -344,8 +353,15 @@
                 <li>Cloud Multi-Device Access</li>
                 <li>Dedicated WhatsApp Support</li>
             </ul>
-            <a href="https://wa.me/917502399148?text=Hello%20Dheena,%20I%20want%20the%20Monthly%20Pro%20Plan%20(Rs.499)%20for%20my%20store:%20{{ store_name }}%20(Code:%20{{ store_code }})" target="_blank" style="display: block; background: #f1f5f9; color: #0f172a; padding: 10px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 13px; margin-top: 16px;">
-                Select Monthly Plan
+            <button 
+                type="button" 
+                onclick="payWithRazorpay('monthly')" 
+                style="display: block; width: 100%; background: #2563eb; color: white; border: none; padding: 11px; border-radius: 8px; font-weight: 800; font-size: 13px; margin-top: 16px; cursor: pointer;"
+            >
+                💳 Pay ₹499 via Razorpay
+            </button>
+            <a href="https://wa.me/917502399148?text=Hello%20Dheena,%20I%20want%20the%20Monthly%20Pro%20Plan%20(Rs.499)%20for%20my%20store:%20{{ store_name }}%20(Code:%20{{ store_code }})" target="_blank" style="display: block; background: #f1f5f9; color: #0f172a; padding: 9px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 12px; margin-top: 8px;">
+                Chat on WhatsApp
             </a>
         </div>
 
@@ -360,10 +376,25 @@
                 <li>Priority Feature Requests</li>
                 <li>Direct Phone Call Founder Support</li>
             </ul>
-            <a href="https://wa.me/917502399148?text=Hello%20Dheena,%20I%20want%20the%20Annual%20Pro%20Plan%20(Rs.4999)%20for%20my%20store:%20{{ store_name }}%20(Code:%20{{ store_code }})" target="_blank" style="display: block; background: #2563eb; color: white; padding: 10px; border-radius: 8px; text-decoration: none; font-weight: 800; font-size: 13px; margin-top: 16px;">
-                ⭐ Select Annual Plan
+            <button 
+                type="button" 
+                onclick="payWithRazorpay('annual')" 
+                style="display: block; width: 100%; background: #16a34a; color: white; border: none; padding: 11px; border-radius: 8px; font-weight: 800; font-size: 13px; margin-top: 16px; cursor: pointer;"
+            >
+                ⭐ Pay ₹4,999 via Razorpay
+            </button>
+            <a href="https://wa.me/917502399148?text=Hello%20Dheena,%20I%20want%20the%20Annual%20Pro%20Plan%20(Rs.4999)%20for%20my%20store:%20{{ store_name }}%20(Code:%20{{ store_code }})" target="_blank" style="display: block; background: #eff6ff; color: #1e40af; padding: 9px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 12px; margin-top: 8px;">
+                Chat on WhatsApp
             </a>
         </div>
+    </div>
+
+    <!-- MANDATORY LEGAL FOOTER -->
+    <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #e2e8f0; font-size: 13px; color: #64748b;">
+        <a href="/terms" style="color: #475569; text-decoration: none; margin: 0 10px; font-weight: 600;">Terms &amp; Conditions</a> |
+        <a href="/privacy" style="color: #475569; text-decoration: none; margin: 0 10px; font-weight: 600;">Privacy Policy</a> |
+        <a href="/refund" style="color: #475569; text-decoration: none; margin: 0 10px; font-weight: 600;">Refund &amp; Cancellation</a> |
+        <a href="/about" style="color: #475569; text-decoration: none; margin: 0 10px; font-weight: 600;">Contact Us</a>
     </div>
 
 </div>
@@ -399,15 +430,82 @@
         setInterval(updateLiveCountdown, 1000);
     }
 
-    // Pay ₹5 Test Subscription
+    // Pay via Razorpay Checkout
     let lastGeneratedKey = "";
+    async function payWithRazorpay(planType) {
+        try {
+            const res = await fetch("/api/payment/create-order", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ plan_type: planType })
+            });
+            const data = await res.json();
+            if (!res.ok || !data.success) {
+                if (data.keys_missing) {
+                    alert("Razorpay Live API Keys are not added yet!\n\nPlease add your Key ID and Key Secret to data/razorpay.json or configure them in the server.");
+                    return;
+                }
+                throw new Error(data.error || "Order creation failed");
+            }
+
+            const options = {
+                key: data.key_id,
+                amount: data.amount,
+                currency: data.currency,
+                name: "Cloud Billing Software",
+                description: data.plan_name,
+                order_id: data.order_id,
+                prefill: {
+                    name: data.owner_name || "",
+                    email: data.owner_email || "",
+                    contact: data.owner_phone || ""
+                },
+                theme: {
+                    color: "#2563eb"
+                },
+                handler: async function (response) {
+                    const verifyRes = await fetch("/api/payment/verify", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            razorpay_order_id: response.razorpay_order_id,
+                            razorpay_payment_id: response.razorpay_payment_id,
+                            razorpay_signature: response.razorpay_signature,
+                            plan_type: planType
+                        })
+                    });
+                    const verifyData = await verifyRes.json();
+                    if (verifyRes.ok && verifyData.success) {
+                        lastGeneratedKey = verifyData.key_code;
+                        document.getElementById("generatedKeyBox").innerText = verifyData.key_code;
+                        document.getElementById("payResultTitle").innerText = "🎉 Payment Verified! Unique Key Issued";
+                        document.getElementById("testPayResult").style.display = "block";
+                        alert("🎉 Payment Successful! " + verifyData.message + "\nYour unique key: " + verifyData.key_code);
+                        setTimeout(() => window.location.reload(), 2500);
+                    } else {
+                        alert("Verification failed: " + (verifyData.error || "Please contact support"));
+                    }
+                }
+            };
+
+            const rzp = new Razorpay(options);
+            rzp.on('payment.failed', function (resp){
+                alert("Payment was not completed: " + resp.error.description);
+            });
+            rzp.open();
+        } catch (err) {
+            alert("Payment error: " + err.message);
+        }
+    }
+
+    // Direct Simulate Test Payment (Fallback)
     async function payTestSubscription() {
         const btn = document.getElementById("payTestBtn");
         const resBox = document.getElementById("testPayResult");
         const keyDisplay = document.getElementById("generatedKeyBox");
 
         btn.disabled = true;
-        btn.innerText = "⏳ Processing ₹5 Test Payment...";
+        btn.innerText = "⏳ Processing...";
 
         try {
             const res = await fetch("/api/subscription/pay-test", {
@@ -419,18 +517,15 @@
                 lastGeneratedKey = data.key_code;
                 keyDisplay.innerText = data.key_code;
                 resBox.style.display = "block";
-                btn.style.background = "#16a34a";
-                btn.innerText = "✅ ₹5 Paid & Pro Unlocked (30 Mins)!";
-
-                // Refresh after 2.5 seconds to refresh status banner
-                setTimeout(() => window.location.reload(), 2500);
+                btn.innerText = "✅ Unlocked 30 Mins!";
+                setTimeout(() => window.location.reload(), 2000);
             } else {
                 throw new Error(data.error || "Payment failed");
             }
         } catch (err) {
             alert("Payment error: " + err.message);
             btn.disabled = false;
-            btn.innerText = "💳 Pay ₹5 (Get Unique Key & 30 Mins Pro)";
+            btn.innerText = "⚡ Instant Simulate ₹5";
         }
     }
 

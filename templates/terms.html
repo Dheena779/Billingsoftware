@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terms & Conditions - Cloud Billing Software</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .policy-container {
+            max-width: 860px;
+            margin: 40px auto 80px auto;
+            padding: 0 24px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            color: #1e293b;
+            line-height: 1.7;
+        }
+        .policy-card {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0;
+        }
+        h1 { font-size: 28px; font-weight: 800; color: #0f172a; margin-bottom: 8px; }
+        h2 { font-size: 18px; font-weight: 700; color: #1e3a8a; margin-top: 28px; margin-bottom: 10px; }
+        p, li { font-size: 14px; color: #475569; }
+        .last-updated { font-size: 13px; color: #64748b; margin-bottom: 24px; }
+    </style>
+</head>
+<body style="background: #f8fafc; margin: 0;">
+
+{% if session.get('logged_in') %}
+    {% include 'navbar.html' %}
+{% else %}
+<header style="padding: 16px 28px; background: white; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
+    <a href="/" style="text-decoration: none; font-size: 20px; font-weight: 800; color: #0f172a;">⚡ Cloud <span>Billing</span></a>
+    <div>
+        <a href="/login" style="color: #475569; text-decoration: none; font-weight: 600; margin-right: 16px; font-size: 14px;">Sign In</a>
+        <a href="/register" style="background: #2563eb; color: white; text-decoration: none; font-weight: 700; padding: 8px 16px; border-radius: 8px; font-size: 14px;">Start Free Trial</a>
+    </div>
+</header>
+{% endif %}
+
+<div class="policy-container">
+    <div class="policy-card">
+        <h1>Terms &amp; Conditions</h1>
+        <div class="last-updated">Last Updated: October 2026</div>
+
+        <p>Welcome to <strong>Cloud Billing Software</strong>, owned and operated by <strong>Dheena</strong>, located in Vellore, Tamil Nadu, India. By registering an account or accessing our cloud billing platform and services, you agree to comply with and be bound by the following Terms &amp; Conditions.</p>
+
+        <h2>1. Services Provided</h2>
+        <p>Cloud Billing Software is a multi-tenant cloud-based SaaS platform designed for retail shops, supermarkets, and businesses. Services include POS barcode billing, inventory management, staff attendance, sales reporting, and thermal invoice generation.</p>
+
+        <h2>2. Account Registration &amp; Store Code</h2>
+        <p>You agree to provide accurate and complete registration details. You are assigned a unique Store Code which identifies your store database. You are responsible for maintaining the confidentiality of your store login credentials and staff access.</p>
+
+        <h2>3. Subscription, Trial &amp; Payments</h2>
+        <p>We offer initial free trial access, test passes (₹5 for 30 minutes), and standard Pro subscription plans (Monthly ₹499, Annual ₹4,999). Payments are processed securely via authorized Indian payment gateways (Razorpay). Upon successful payment, a single-use unique license key is issued and activated on your account.</p>
+
+        <h2>4. Single-Use License Key Policy</h2>
+        <p>Each license key generated is strictly unique and tied to the redeeming store account. Sharing or attempting to use a redeemed license key across multiple store accounts is prohibited and will be rejected by the system.</p>
+
+        <h2>5. Data Privacy &amp; Security</h2>
+        <p>Each store's products, bills, customer data, and staff records are strictly isolated. We do not sell or disclose your store business data to third parties.</p>
+
+        <h2>6. Contact Details</h2>
+        <p>For any questions regarding these Terms, contact:</p>
+        <ul>
+            <li><strong>Founder:</strong> Dheena</li>
+            <li><strong>Location:</strong> Vellore, Tamil Nadu, India</li>
+            <li><strong>Mobile:</strong> +91 7502399148</li>
+            <li><strong>Email:</strong> deenadayalan779@gmail.com</li>
+        </ul>
+    </div>
+</div>
+
+<footer style="text-align: center; padding: 24px; color: #64748b; font-size: 13px;">
+    &copy; 2026 Cloud Billing Software. Founder Dheena, Vellore. | <a href="/terms">Terms</a> | <a href="/privacy">Privacy</a> | <a href="/refund">Refund Policy</a>
+</footer>
+
+</body>
+</html>

@@ -82,6 +82,32 @@ def initialize_database():
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_license_keys_store ON license_keys(used_by_store_id)")
 
     # =========================
+    # PAYMENTS (Razorpay & Subscription Transactions)
+    # =========================
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS payments (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            store_id INTEGER NOT NULL,
+            order_id TEXT NOT NULL,
+            payment_id TEXT UNIQUE,
+            signature TEXT,
+            amount REAL NOT NULL,
+            currency TEXT DEFAULT 'INR',
+            plan_name TEXT NOT NULL,
+            duration_minutes INTEGER NOT NULL,
+            key_code TEXT,
+            status TEXT DEFAULT 'created',
+            method TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (store_id) REFERENCES stores(id)
+        )
+    """)
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_payments_order ON payments(order_id)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_payments_payment ON payments(payment_id)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_payments_store ON payments(store_id)")
+
+    # =========================
     # USERS
     # =========================
 
@@ -1101,6 +1127,38 @@ def process_test_payment(store_id, amount=5.0, duration_minutes=30):
         # 2. Redeem it for this store
         success, msg = redeem_license_key(key_code, store_id)
         return success, key_code, msg
+    finally:
+        conn.close()
+
+
+def record_payment_order(store_id, order_id, amount, plan_name, duration_minutes):
+    """
+    Records an initiated Razorpay payment order.
+    """
+    conn = get_connection()
+    try:
+        cur = conn.execute("""
+            INSERT INTO payments (store_id, order_id, amount, plan_name, duration_minutes, status)
+            VALUES (?, ?, ?, ?, ?, 'created')
+        """, (store_id, order_id, amount, plan_name, duration_minutes))
+        conn.commit()
+        return cur.lastrowid
+    finally:
+        conn.close()
+
+
+def record_payment_success(order_id, payment_id, signature, key_code, method=""):
+    """
+    Marks a Razorpay payment order as successfully paid.
+    """
+    conn = get_connection()
+    try:
+        conn.execute("""
+            UPDATE payments
+            SET payment_id = ?, signature = ?, key_code = ?, status = 'paid', method = ?
+            WHERE order_id = ?
+        """, (payment_id, signature, key_code, method, order_id))
+        conn.commit()
     finally:
         conn.close()
 
