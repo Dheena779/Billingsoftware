@@ -18,6 +18,7 @@ from database import (
 from invoice import get_invoice_data
 from reports import reports_bp
 from settings import settings_bp, get_settings, format_datetime
+from founder import founder_bp
 
 
 app = Flask(
@@ -27,6 +28,7 @@ app = Flask(
 )
 app.register_blueprint(reports_bp)
 app.register_blueprint(settings_bp)
+app.register_blueprint(founder_bp)
 
 
 # ==================================================
@@ -141,6 +143,7 @@ def check_subscription_expiration():
         path.startswith("/logout") or
         path.startswith("/api/subscription") or
         path.startswith("/api/payment") or
+        path.startswith("/founder") or
         path in ["/", "/login", "/register", "/staff-login"]
     ):
         return None
@@ -169,7 +172,7 @@ def check_subscription_expiration():
 @app.before_request
 def enforce_session_timeout():
 
-    if request.path.startswith("/static") or not session.get("logged_in"):
+    if request.path.startswith("/static") or request.path.startswith("/founder") or not session.get("logged_in"):
         return None
 
     try:
@@ -277,7 +280,7 @@ def check_cloud_session():
         "/", "/login", "/register", "/api/register",
         "/about", "/terms", "/privacy", "/refund", "/refund-policy"
     ]
-    if request.path.startswith("/static") or request.path in public_routes:
+    if request.path.startswith("/static") or request.path.startswith("/founder") or request.path in public_routes:
         return
 
     if not session.get("logged_in"):

@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Founder Master Dashboard - Cloud Billing SaaS</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #0f172a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #e2e8f0; }
+
+        .top-bar {
+            background: linear-gradient(135deg, #7f1d1d 0%, #991b1b 100%);
+            padding: 14px 28px;
+            display: flex; justify-content: space-between; align-items: center;
+            position: sticky; top: 0; z-index: 100;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        .top-bar h1 { font-size: 18px; font-weight: 800; color: white; display: flex; align-items: center; gap: 8px; }
+        .top-bar .badge { background: #fca5a5; color: #7f1d1d; font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 6px; text-transform: uppercase; }
+        .top-bar a { color: #fecaca; text-decoration: none; font-size: 13px; font-weight: 600; }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 24px 20px 60px; }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 14px;
+            padding: 18px 20px;
+            text-align: center;
+        }
+        .stat-card .icon { font-size: 28px; margin-bottom: 6px; }
+        .stat-card .val { font-size: 28px; font-weight: 900; color: white; }
+        .stat-card .label { font-size: 12px; color: #94a3b8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
+
+        .section-title {
+            font-size: 18px; font-weight: 800; color: white;
+            margin: 30px 0 16px; display: flex; align-items: center; gap: 10px;
+        }
+
+        .tool-bar {
+            display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; align-items: center;
+        }
+        .tool-bar input {
+            padding: 10px 14px; border: 1px solid #475569; border-radius: 8px;
+            background: #1e293b; color: white; font-size: 14px; min-width: 240px;
+        }
+        .tool-bar input:focus { outline: none; border-color: #3b82f6; }
+        .tool-btn {
+            padding: 10px 18px; border: none; border-radius: 8px;
+            font-size: 13px; font-weight: 700; cursor: pointer; transition: 0.2s;
+        }
+        .tool-btn.blue { background: #2563eb; color: white; }
+        .tool-btn.green { background: #16a34a; color: white; }
+        .tool-btn.red { background: #dc2626; color: white; }
+
+        .stores-table {
+            width: 100%; border-collapse: collapse; background: #1e293b;
+            border-radius: 12px; overflow: hidden; border: 1px solid #334155;
+        }
+        .stores-table th {
+            background: #334155; text-align: left; padding: 12px 14px;
+            font-size: 11px; font-weight: 700; color: #94a3b8;
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .stores-table td {
+            padding: 12px 14px; border-top: 1px solid #1e293b;
+            font-size: 13px; color: #cbd5e1;
+        }
+        .stores-table tr:hover td { background: #263547; }
+        .stores-table .code {
+            font-family: monospace; font-weight: 800; color: #38bdf8;
+            background: #0c4a6e; padding: 3px 8px; border-radius: 5px; font-size: 12px;
+        }
+        .status-active { color: #4ade80; font-weight: 700; }
+        .status-trial { color: #fbbf24; font-weight: 700; }
+        .status-expired { color: #f87171; font-weight: 700; }
+
+        .detail-btn {
+            background: #1e40af; color: white; border: none; padding: 5px 12px;
+            border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7); z-index: 200; align-items: center; justify-content: center;
+        }
+        .modal-box {
+            background: #1e293b; border: 1px solid #475569; border-radius: 16px;
+            width: 95%; max-width: 900px; max-height: 85vh; overflow-y: auto;
+            padding: 28px; box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+        }
+        .modal-box h2 { font-size: 20px; font-weight: 800; color: white; margin-bottom: 18px; }
+        .modal-close {
+            float: right; background: none; border: none; color: #94a3b8;
+            font-size: 24px; cursor: pointer;
+        }
+        .detail-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px; margin-bottom: 20px;
+        }
+        .detail-item {
+            background: #0f172a; border: 1px solid #334155; border-radius: 10px; padding: 12px 14px;
+        }
+        .detail-item .dlabel { font-size: 10px; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+        .detail-item .dval { font-size: 15px; font-weight: 800; color: #f1f5f9; margin-top: 2px; }
+
+        .sub-table {
+            width: 100%; border-collapse: collapse; margin-top: 8px; margin-bottom: 18px;
+        }
+        .sub-table th {
+            background: #334155; text-align: left; padding: 8px 10px;
+            font-size: 11px; color: #94a3b8; text-transform: uppercase;
+        }
+        .sub-table td { padding: 8px 10px; border-top: 1px solid #263547; font-size: 12px; color: #cbd5e1; }
+
+        .tab-row { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+        .tab-btn {
+            padding: 7px 16px; border: 1px solid #475569; border-radius: 8px;
+            background: transparent; color: #94a3b8; font-size: 12px; font-weight: 700; cursor: pointer;
+        }
+        .tab-btn.active { background: #2563eb; color: white; border-color: #2563eb; }
+
+        @media (max-width: 768px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .stores-table { font-size: 12px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="top-bar">
+    <h1>🔥 Founder Master Dashboard <span class="badge">Super Admin</span></h1>
+    <div>
+        <span style="color: #fecaca; font-size: 13px; margin-right: 16px;">👤 {{ session.get('founder_name', 'Dheena') }}</span>
+        <a href="/founder/logout">🔓 Logout</a>
+    </div>
+</div>
+
+<div class="container">
+
+    <!-- STATS GRID -->
+    <div class="stats-grid" id="statsGrid">
+        <div class="stat-card"><div class="icon">🏬</div><div class="val" id="sStores">-</div><div class="label">Total Stores</div></div>
+        <div class="stat-card"><div class="icon">👥</div><div class="val" id="sUsers">-</div><div class="label">Total Users</div></div>
+        <div class="stat-card"><div class="icon">📦</div><div class="val" id="sProducts">-</div><div class="label">Total Products</div></div>
+        <div class="stat-card"><div class="icon">🧾</div><div class="val" id="sBills">-</div><div class="label">Total Bills</div></div>
+        <div class="stat-card"><div class="icon">💰</div><div class="val" id="sRevenue">-</div><div class="label">Total Billing Revenue</div></div>
+        <div class="stat-card"><div class="icon">⭐</div><div class="val" id="sActivePro">-</div><div class="label">Active Pro</div></div>
+        <div class="stat-card"><div class="icon">⏳</div><div class="val" id="sTrial">-</div><div class="label">On Trial</div></div>
+        <div class="stat-card"><div class="icon">🚫</div><div class="val" id="sExpired">-</div><div class="label">Expired</div></div>
+        <div class="stat-card"><div class="icon">💳</div><div class="val" id="sPayments">-</div><div class="label">Payments Received</div></div>
+        <div class="stat-card"><div class="icon">₹</div><div class="val" id="sPayRevenue">-</div><div class="label">Subscription Revenue</div></div>
+        <div class="stat-card"><div class="icon">🔑</div><div class="val" id="sKeys">-</div><div class="label">Keys Used / Total</div></div>
+        <div class="stat-card"><div class="icon">🆕</div><div class="val" id="sNew7d">-</div><div class="label">New Stores (7 Days)</div></div>
+    </div>
+
+    <!-- FOUNDER TOOLS -->
+    <div class="section-title">🔧 Founder Tools</div>
+    <div class="tool-bar">
+        <button class="tool-btn green" onclick="generateKeyModal()">🔑 Generate License Key</button>
+        <button class="tool-btn blue" onclick="loadStats(); loadStores(); loadPayments();">🔄 Refresh All Data</button>
+    </div>
+
+    <div id="keyGenResult" style="display:none; background: #064e3b; border: 1px solid #10b981; padding: 14px 18px; border-radius: 10px; margin-bottom: 20px;">
+        <span style="font-size: 14px; font-weight: 700; color: #a7f3d0;">Generated Key:</span>
+        <span id="genKeyCode" style="font-family: monospace; font-size: 18px; font-weight: 900; color: #34d399; margin-left: 10px;"></span>
+        <button onclick="navigator.clipboard.writeText(document.getElementById('genKeyCode').innerText)" style="margin-left: 10px; background: #10b981; color: white; border: none; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer;">📋 Copy</button>
+    </div>
+
+    <!-- ALL STORES TABLE -->
+    <div class="section-title">🏬 All Registered Stores</div>
+    <div class="tool-bar">
+        <input type="text" id="storeSearch" placeholder="🔍 Search stores by name, code, owner..." oninput="filterStores()">
+    </div>
+
+    <div style="overflow-x: auto;">
+        <table class="stores-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Store Code</th>
+                    <th>Store Name</th>
+                    <th>Owner</th>
+                    <th>Contact</th>
+                    <th>Plan</th>
+                    <th>Time Left</th>
+                    <th>Products</th>
+                    <th>Bills</th>
+                    <th>Revenue (₹)</th>
+                    <th>Staff</th>
+                    <th>Registered</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="storesBody">
+                <tr><td colspan="13" style="text-align:center; padding: 30px; color: #64748b;">Loading stores...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ALL SUBSCRIPTION PAYMENTS & REVENUE -->
+    <div class="section-title">💳 All Subscription Payments & Revenue</div>
+    <div class="tool-bar">
+        <input type="text" id="paymentSearch" placeholder="🔍 Search payments by store, order ID, payment ID..." oninput="filterPayments()">
+    </div>
+
+    <div style="overflow-x: auto; margin-bottom: 40px;">
+        <table class="stores-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Store Code</th>
+                    <th>Store Name</th>
+                    <th>Owner</th>
+                    <th>Plan</th>
+                    <th>Amount (₹)</th>
+                    <th>Payment ID</th>
+                    <th>Order ID</th>
+                    <th>License Key</th>
+                    <th>Status</th>
+                    <th>Date & Time</th>
+                </tr>
+            </thead>
+            <tbody id="paymentsBody">
+                <tr><td colspan="11" style="text-align:center; padding: 30px; color: #64748b;">Loading payments...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<!-- STORE DETAIL MODAL -->
+<div class="modal-overlay" id="storeDetailModal">
+    <div class="modal-box">
+        <button class="modal-close" onclick="closeDetailModal()">&times;</button>
+        <h2 id="modalTitle">Store Details</h2>
+        <div id="modalContent">Loading...</div>
+    </div>
+</div>
+
+<script>
+let allStores = [];
+let allPayments = [];
+
+async function loadStats() {
+    const res = await fetch("/founder/api/stats");
+    const d = await res.json();
+    if (!d.success) return;
+    document.getElementById("sStores").innerText = d.total_stores;
+    document.getElementById("sUsers").innerText = d.total_users;
+    document.getElementById("sProducts").innerText = d.total_products;
+    document.getElementById("sBills").innerText = d.total_bills;
+    document.getElementById("sRevenue").innerText = "₹" + d.total_revenue.toLocaleString('en-IN');
+    document.getElementById("sActivePro").innerText = d.active_pro;
+    document.getElementById("sTrial").innerText = d.on_trial;
+    document.getElementById("sExpired").innerText = d.expired;
+    document.getElementById("sPayments").innerText = d.total_payments;
+    document.getElementById("sPayRevenue").innerText = "₹" + d.total_payment_revenue.toLocaleString('en-IN');
+    document.getElementById("sKeys").innerText = d.used_keys + " / " + d.total_keys;
+    document.getElementById("sNew7d").innerText = d.new_stores_7d;
+}
+
+async function loadStores() {
+    const res = await fetch("/founder/api/stores");
+    const d = await res.json();
+    if (!d.success) return;
+    allStores = d.stores;
+    renderStores(allStores);
+}
+
+function renderStores(stores) {
+    const body = document.getElementById("storesBody");
+    if (!stores.length) {
+        body.innerHTML = '<tr><td colspan="13" style="text-align:center; padding: 30px; color: #64748b;">No stores found.</td></tr>';
+        return;
+    }
+    body.innerHTML = stores.map((s, i) => {
+        const statusClass = s.plan_status === 'active' ? 'status-active' : s.plan_status === 'trial' ? 'status-trial' : 'status-expired';
+        const statusIcon = s.plan_status === 'active' ? '⭐' : s.plan_status === 'trial' ? '⏳' : '🚫';
+        const contact = s.owner_email || s.owner_phone || '-';
+        const date = s.created_at ? s.created_at.substring(0, 10) : '-';
+        return `<tr>
+            <td>${i + 1}</td>
+            <td><span class="code">${s.store_code}</span></td>
+            <td style="font-weight:700; color:white;">${s.store_name}</td>
+            <td>${s.owner_name}</td>
+            <td style="font-size:11px; word-break:break-all;">${contact}</td>
+            <td class="${statusClass}">${statusIcon} ${s.plan_status.toUpperCase()}</td>
+            <td style="font-size:12px;">${s.time_left_str || '-'}</td>
+            <td style="text-align:center;">${s.product_count}</td>
+            <td style="text-align:center;">${s.bill_count}</td>
+            <td style="font-weight:700; color:#4ade80;">₹${s.total_revenue.toLocaleString('en-IN')}</td>
+            <td style="text-align:center;">${s.staff_count}</td>
+            <td style="font-size:11px;">${date}</td>
+            <td>
+                <button class="detail-btn" onclick="openStoreDetail(${s.id})">📋 View</button>
+                <button class="detail-btn" style="background:#16a34a; margin-top:4px;" onclick="activateStore(${s.id}, '${s.store_name}')">⭐ Activate</button>
+            </td>
+        </tr>`;
+    }).join('');
+}
+
+function filterStores() {
+    const q = document.getElementById("storeSearch").value.trim().toLowerCase();
+    if (!q) return renderStores(allStores);
+    renderStores(allStores.filter(s =>
+        s.store_name.toLowerCase().includes(q) ||
+        s.store_code.toLowerCase().includes(q) ||
+        s.owner_name.toLowerCase().includes(q) ||
+        (s.owner_email || '').toLowerCase().includes(q)
+    ));
+}
+
+async function openStoreDetail(storeId) {
+    document.getElementById("storeDetailModal").style.display = "flex";
+    document.getElementById("modalContent").innerHTML = "<p style='color:#94a3b8;'>Loading store data...</p>";
+
+    const res = await fetch(`/founder/api/store/${storeId}`);
+    const d = await res.json();
+    if (!d.success) {
+        document.getElementById("modalContent").innerHTML = "<p style='color:#f87171;'>Error loading store.</p>";
+        return;
+    }
+
+    const s = d.store;
+    const statusClass = s.plan_status === 'active' ? 'status-active' : s.plan_status === 'trial' ? 'status-trial' : 'status-expired';
+    document.getElementById("modalTitle").innerText = `${s.store_name} (${s.store_code})`;
+
+    let html = `
+        <div class="detail-grid">
+            <div class="detail-item"><div class="dlabel">Store Code</div><div class="dval">${s.store_code}</div></div>
+            <div class="detail-item"><div class="dlabel">Owner</div><div class="dval">${s.owner_name}</div></div>
+            <div class="detail-item"><div class="dlabel">Email</div><div class="dval">${s.owner_email || '-'}</div></div>
+            <div class="detail-item"><div class="dlabel">Phone</div><div class="dval">${s.owner_phone || '-'}</div></div>
+            <div class="detail-item"><div class="dlabel">Plan Status</div><div class="dval ${statusClass}">${s.plan_status.toUpperCase()}</div></div>
+            <div class="detail-item"><div class="dlabel">Time Left</div><div class="dval">${s.time_left_str || '-'}</div></div>
+            <div class="detail-item"><div class="dlabel">Expires At</div><div class="dval">${s.expires_at || '-'}</div></div>
+            <div class="detail-item"><div class="dlabel">Registered</div><div class="dval">${(s.created_at || '').substring(0, 16)}</div></div>
+        </div>
+    `;
+
+    // Tabs
+    html += `<div class="tab-row">
+        <button class="tab-btn active" onclick="showTab(this, 'tabProducts')">📦 Products (${d.products.length})</button>
+        <button class="tab-btn" onclick="showTab(this, 'tabBills')">🧾 Bills (${d.bills.length})</button>
+        <button class="tab-btn" onclick="showTab(this, 'tabStaff')">👥 Staff (${d.staff.length})</button>
+        <button class="tab-btn" onclick="showTab(this, 'tabUsers')">🔐 Users (${d.users.length})</button>
+        <button class="tab-btn" onclick="showTab(this, 'tabPayments')">💳 Payments (${d.payments.length})</button>
+        <button class="tab-btn" onclick="showTab(this, 'tabKeys')">🔑 Keys (${d.license_keys.length})</button>
+    </div>`;
+
+    // Products
+    html += `<div id="tabProducts">`;
+    if (d.products.length) {
+        html += `<table class="sub-table"><thead><tr><th>Name</th><th>Billing Name</th><th>Price</th><th>Cost</th><th>Stock</th><th>Barcode</th></tr></thead><tbody>`;
+        d.products.forEach(p => {
+            html += `<tr><td>${p.name}</td><td>${p.billing_name || '-'}</td><td style="color:#4ade80;">₹${p.price}</td><td>₹${p.purchase_price || 0}</td><td>${p.stock}</td><td style="font-family:monospace; font-size:11px;">${p.barcode || '-'}</td></tr>`;
+        });
+        html += `</tbody></table>`;
+    } else html += `<p style="color:#64748b; font-size:13px;">No products added yet.</p>`;
+    html += `</div>`;
+
+    // Bills
+    html += `<div id="tabBills" style="display:none;">`;
+    if (d.bills.length) {
+        html += `<table class="sub-table"><thead><tr><th>Bill #</th><th>Total</th><th>Status</th><th>Method</th><th>Customer</th><th>Date</th></tr></thead><tbody>`;
+        d.bills.forEach(b => {
+            html += `<tr><td style="font-weight:700;">${b.bill_number}</td><td style="color:#4ade80; font-weight:700;">₹${b.total}</td><td>${b.payment_status || 'Paid'}</td><td>${b.payment_method || '-'}</td><td>${b.customer_name || '-'}</td><td style="font-size:11px;">${(b.created_at || '').substring(0, 16)}</td></tr>`;
+        });
+        html += `</tbody></table>`;
+    } else html += `<p style="color:#64748b; font-size:13px;">No bills created yet.</p>`;
+    html += `</div>`;
+
+    // Staff
+    html += `<div id="tabStaff" style="display:none;">`;
+    if (d.staff.length) {
+        html += `<table class="sub-table"><thead><tr><th>Name</th><th>Phone</th><th>Address</th><th>Salary</th><th>Type</th><th>Joined</th></tr></thead><tbody>`;
+        d.staff.forEach(st => {
+            html += `<tr><td>${st.name}</td><td>${st.phone || '-'}</td><td>${st.address || '-'}</td><td>₹${st.salary || 0}</td><td>${st.salary_type || '-'}</td><td>${st.joining_date || '-'}</td></tr>`;
+        });
+        html += `</tbody></table>`;
+    } else html += `<p style="color:#64748b; font-size:13px;">No staff added.</p>`;
+    html += `</div>`;
+
+    // Users
+    html += `<div id="tabUsers" style="display:none;">`;
+    if (d.users.length) {
+        html += `<table class="sub-table"><thead><tr><th>Username</th><th>Name</th><th>Role</th><th>Email</th><th>Phone</th><th>Created</th></tr></thead><tbody>`;
+        d.users.forEach(u => {
+            html += `<tr><td style="font-weight:700;">${u.username}</td><td>${u.owner_name || '-'}</td><td>${u.role}</td><td>${u.email || '-'}</td><td>${u.phone || '-'}</td><td style="font-size:11px;">${(u.created_at || '').substring(0, 16)}</td></tr>`;
+        });
+        html += `</tbody></table>`;
+    } else html += `<p style="color:#64748b; font-size:13px;">No users.</p>`;
+    html += `</div>`;
+
+    // Payments
+    html += `<div id="tabPayments" style="display:none;">`;
+    if (d.payments.length) {
+        html += `<table class="sub-table"><thead><tr><th>Order ID</th><th>Payment ID</th><th>Amount</th><th>Plan</th><th>Key</th><th>Status</th><th>Date</th></tr></thead><tbody>`;
+        d.payments.forEach(p => {
+            const sc = p.status === 'paid' ? 'color:#4ade80;' : 'color:#fbbf24;';
+            html += `<tr><td style="font-size:11px;">${p.order_id || '-'}</td><td style="font-size:11px;">${p.payment_id || '-'}</td><td style="font-weight:700;">₹${p.amount}</td><td>${p.plan_name || '-'}</td><td style="font-family:monospace; font-size:11px; color:#38bdf8;">${p.key_code || '-'}</td><td style="${sc} font-weight:700;">${(p.status || '').toUpperCase()}</td><td style="font-size:11px;">${(p.created_at || '').substring(0, 16)}</td></tr>`;
+        });
+        html += `</tbody></table>`;
+    } else html += `<p style="color:#64748b; font-size:13px;">No payments recorded.</p>`;
+    html += `</div>`;
+
+    // Keys
+    html += `<div id="tabKeys" style="display:none;">`;
+    if (d.license_keys.length) {
+        html += `<table class="sub-table"><thead><tr><th>Key Code</th><th>Duration</th><th>Price</th><th>Plan</th><th>Used At</th></tr></thead><tbody>`;
+        d.license_keys.forEach(k => {
+            html += `<tr><td style="font-family:monospace; font-weight:700; color:#38bdf8;">${k.key_code}</td><td>${k.duration_minutes}m</td><td>₹${k.price}</td><td>${k.plan_name || '-'}</td><td style="font-size:11px;">${(k.used_at || '').substring(0, 16)}</td></tr>`;
+        });
+        html += `</tbody></table>`;
+    } else html += `<p style="color:#64748b; font-size:13px;">No keys redeemed.</p>`;
+    html += `</div>`;
+
+    document.getElementById("modalContent").innerHTML = html;
+}
+
+function showTab(btn, tabId) {
+    btn.closest('.modal-box').querySelectorAll('[id^="tab"]').forEach(d => d.style.display = 'none');
+    document.getElementById(tabId).style.display = 'block';
+    btn.closest('.tab-row').querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+}
+
+function closeDetailModal() {
+    document.getElementById("storeDetailModal").style.display = "none";
+}
+
+async function generateKeyModal() {
+    const dur = prompt("Duration in minutes (e.g. 30, 1440 for 1 day, 43200 for 30 days):", "30");
+    if (!dur) return;
+    const price = prompt("Price in Rupees:", "5");
+    if (!price) return;
+
+    const res = await fetch("/founder/api/generate-key", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ duration_minutes: parseInt(dur), price: parseFloat(price), plan_name: `${dur}-Minute Pro Access` })
+    });
+    const d = await res.json();
+    if (d.success) {
+        document.getElementById("genKeyCode").innerText = d.key_code;
+        document.getElementById("keyGenResult").style.display = "block";
+        alert("Key Generated: " + d.key_code + "\n\nDuration: " + dur + " minutes\nPrice: ₹" + price);
+    } else {
+        alert("Error: " + (d.error || "Failed"));
+    }
+}
+
+async function activateStore(storeId, storeName) {
+    const dur = prompt(`Activate PRO for "${storeName}".\n\nEnter duration in minutes:\n(30 = 30 mins, 1440 = 1 day, 43200 = 30 days):`, "30");
+    if (!dur) return;
+
+    const res = await fetch("/founder/api/activate-store", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ store_id: storeId, duration_minutes: parseInt(dur), price: 0, plan_name: "Founder Activation" })
+    });
+    const d = await res.json();
+    if (d.success) {
+        alert("✅ " + storeName + " activated!\n\nKey: " + d.key_code + "\nExpires: " + d.expires_at + "\nRemaining: " + d.time_left_str);
+        loadStores();
+        loadStats();
+        loadPayments();
+    } else {
+        alert("Error: " + (d.error || "Failed"));
+    }
+}
+
+async function loadPayments() {
+    const res = await fetch("/founder/api/payments");
+    const d = await res.json();
+    if (!d.success) return;
+    allPayments = d.payments;
+    renderPayments(allPayments);
+}
+
+function renderPayments(payments) {
+    const body = document.getElementById("paymentsBody");
+    if (!payments.length) {
+        body.innerHTML = '<tr><td colspan="11" style="text-align:center; padding: 30px; color: #64748b;">No payments recorded yet.</td></tr>';
+        return;
+    }
+    body.innerHTML = payments.map((p, i) => {
+        const sc = p.status === 'paid' ? 'status-active' : 'status-trial';
+        const date = p.created_at ? p.created_at.substring(0, 19) : '-';
+        return `<tr>
+            <td>${i + 1}</td>
+            <td><span class="code">${p.store_code || '-'}</span></td>
+            <td style="font-weight:700; color:white;">${p.store_name || '-'}</td>
+            <td>${p.owner_name || '-'}</td>
+            <td>${p.plan_name || '-'}</td>
+            <td style="font-weight:700; color:#4ade80;">₹${Number(p.amount || 0).toLocaleString('en-IN')}</td>
+            <td style="font-family:monospace; font-size:11px;">${p.payment_id || '-'}</td>
+            <td style="font-family:monospace; font-size:11px;">${p.order_id || '-'}</td>
+            <td style="font-family:monospace; font-size:11px; color:#38bdf8;">${p.key_code || '-'}</td>
+            <td class="${sc}">● ${(p.status || '').toUpperCase()}</td>
+            <td style="font-size:11px;">${date}</td>
+        </tr>`;
+    }).join('');
+}
+
+function filterPayments() {
+    const q = document.getElementById("paymentSearch").value.trim().toLowerCase();
+    if (!q) return renderPayments(allPayments);
+    renderPayments(allPayments.filter(p =>
+        (p.store_name || '').toLowerCase().includes(q) ||
+        (p.store_code || '').toLowerCase().includes(q) ||
+        (p.owner_name || '').toLowerCase().includes(q) ||
+        (p.payment_id || '').toLowerCase().includes(q) ||
+        (p.order_id || '').toLowerCase().includes(q) ||
+        (p.plan_name || '').toLowerCase().includes(q)
+    ));
+}
+
+// Load on page ready
+loadStats();
+loadStores();
+loadPayments();
+</script>
+
+</body>
+</html>
