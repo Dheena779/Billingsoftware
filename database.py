@@ -129,6 +129,7 @@ def initialize_database():
             email TEXT,
             phone TEXT,
             staff_id INTEGER,
+            email_verified INTEGER DEFAULT 0,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (store_id) REFERENCES stores(id) ON DELETE CASCADE
         )
@@ -445,6 +446,13 @@ def initialize_database():
             ADD COLUMN staff_id INTEGER
         """)
 
+    if "email_verified" not in user_columns:
+
+        cursor.execute("""
+            ALTER TABLE users
+            ADD COLUMN email_verified INTEGER DEFAULT 0
+        """)
+
     # ==================================================
     # BUSINESS DATABASE MIGRATION
     # ==================================================
@@ -756,7 +764,7 @@ def initialize_database():
     conn.close()
 
 
-def register_new_store(store_name, owner_name, email_or_phone, password, city="", state="", address="", business_type="", custom_store_code=None):
+def register_new_store(store_name, owner_name, email_or_phone, password, city="", state="", address="", business_type="", custom_store_code=None, email_verified=0):
     """
     Registers a new store with a 5-minute free trial.
     Creates:
@@ -801,8 +809,8 @@ def register_new_store(store_name, owner_name, email_or_phone, password, city=""
                     break
                 attempt += 1
 
-        # 5-minute testing trial (as requested for instant verification)
-        trial_ends = (datetime.now() + timedelta(minutes=5)).strftime("%Y-%m-%d %H:%M:%S")
+        # 7-day free trial for new store registrations
+        trial_ends = (datetime.now() + timedelta(days=7)).strftime("%Y-%m-%d %H:%M:%S")
 
         cur = conn.execute("""
             INSERT INTO stores (
@@ -817,9 +825,9 @@ def register_new_store(store_name, owner_name, email_or_phone, password, city=""
         hashed_pw = generate_password_hash(password)
         username = email or phone or f"admin_{store_code.lower()}"
         cur_u = conn.execute("""
-            INSERT INTO users (store_id, username, password, owner_name, role, email, phone)
-            VALUES (?, ?, ?, ?, 'admin', ?, ?)
-        """, (store_id, username, hashed_pw, owner_name, email, phone))
+            INSERT INTO users (store_id, username, password, owner_name, role, email, phone, email_verified)
+            VALUES (?, ?, ?, ?, 'admin', ?, ?, ?)
+        """, (store_id, username, hashed_pw, owner_name, email, phone, 1 if (not email or email_verified) else 0))
         user_id = cur_u.lastrowid
 
         # Create Business profile

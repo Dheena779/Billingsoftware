@@ -66,9 +66,24 @@
 
 <div class="register-card">
     <div class="logo" style="margin-bottom: 24px;">
-        <span class="badge-free">✨ 14-DAY FREE TRIAL</span>
+        <img src="{{ url_for('static', filename='billora-logo.jpg') }}" alt="Billora" style="width: 80px; height: auto; border-radius: 16px; margin-bottom: 8px;">
+        <span class="badge-free">✨ 7-DAY FREE TRIAL</span>
         <h1 style="font-size: 24px; font-weight: 900; color: #111827; margin: 4px 0 6px 0; letter-spacing: -0.5px;">Start with Billora</h1>
         <p style="color: #6b7280; font-size: 14px; margin: 0;">Create your cloud billing store in 30 seconds</p>
+    </div>
+
+    <!-- GOOGLE SIGN-UP BUTTON -->
+    <a href="/auth/google?action=register" style="display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 13px; border: 1.5px solid #d1d5db; border-radius: 10px; background: #ffffff; color: #1f2937; font-size: 15px; font-weight: 700; text-decoration: none; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.04);"
+       onmouseover="this.style.background='#f9fafb'; this.style.borderColor='#2563eb'; this.style.boxShadow='0 4px 12px rgba(37,99,235,0.15)';"
+       onmouseout="this.style.background='#ffffff'; this.style.borderColor='#d1d5db'; this.style.boxShadow='0 2px 4px rgba(0,0,0,0.04)';">
+        <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+        Use Google Account
+    </a>
+
+    <div style="display: flex; align-items: center; gap: 12px; margin: 18px 0;">
+        <div style="flex: 1; height: 1px; background: #e5e7eb;"></div>
+        <span style="font-size: 12px; color: #9ca3af; font-weight: 600;">or register manually</span>
+        <div style="flex: 1; height: 1px; background: #e5e7eb;"></div>
     </div>
 
     {% if error %}
@@ -80,7 +95,7 @@
     <form method="POST" action="/register">
         <div class="input-group">
             <label for="store_name">Store / Business Name *</label>
-            <input type="text" id="store_name" name="store_name" placeholder="e.g. FreshMart Grocery" value="{{ store_name or '' }}" required autofocus oninput="suggestStoreCode(this.value)">
+            <input type="text" id="store_name" name="store_name" placeholder="e.g. John Stores" value="{{ form_store_name or '' }}" required autofocus oninput="suggestStoreCode(this.value)">
         </div>
 
         <div class="input-group">
@@ -137,13 +152,13 @@
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
             <div class="input-group">
-                <label for="password">Password *</label>
-                <input type="password" id="password" name="password" placeholder="At least 4 chars" required minlength="4">
+                <label for="password">Password * <small style="color:#6b7280; font-weight:400;">(Letters &amp; Numbers)</small></label>
+                <input type="password" id="password" name="password" placeholder="Min 8 chars (letters+numbers)" required minlength="8">
             </div>
 
             <div class="input-group">
                 <label for="confirm_password">Confirm Password *</label>
-                <input type="password" id="confirm_password" name="confirm_password" placeholder="Re-type password" required minlength="4">
+                <input type="password" id="confirm_password" name="confirm_password" placeholder="Re-type password" required minlength="8">
             </div>
         </div>
 
@@ -155,11 +170,6 @@
     <div style="margin-top: 24px; text-align: center; font-size: 13px; color: #6b7280; border-top: 1px solid #e5e7eb; padding-top: 18px;">
         Already have a store account? 
         <a href="/login" style="color: #2563eb; font-weight: 600; text-decoration: none;">Login here</a>
-        <div style="margin-top: 10px;">
-            <a href="/about" style="color: #64748b; font-size: 12px; text-decoration: none; font-weight: 600;">
-                ℹ️ About Software &amp; Founder Contact
-            </a>
-        </div>
     </div>
 </div>
 

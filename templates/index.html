@@ -843,9 +843,9 @@
     <!-- NAVBAR -->
     <header class="navbar">
         <div class="nav-container">
-            <a href="/" class="brand-link">
-                <div class="brand-icon">⚡</div>
-                <div class="brand-name">Billora<span>.</span></div>
+            <a href="/" class="brand-link" style="display: flex; align-items: center; gap: 10px;">
+                <img src="{{ url_for('static', filename='billora-logo.jpg') }}" alt="Billora" style="width: 40px; height: 40px; object-fit: cover; border-radius: 10px; box-shadow: 0 4px 12px rgba(37,99,235,0.25);">
+                <div class="brand-name">Billora</div>
             </a>
 
             <!-- Desktop Nav Links -->
@@ -881,7 +881,7 @@
         </ul>
         <div style="display: flex; flex-direction: column; gap: 10px;">
             <a href="/login" class="btn-signin" style="text-align: center;">Sign In</a>
-            <a href="/register" class="btn-signup" style="justify-content: center;">Start 14-Day Free Trial</a>
+            <a href="/register" class="btn-signup" style="justify-content: center;">Start 7-Day Free Trial</a>
         </div>
     </div>
 
@@ -900,7 +900,7 @@
 
             <div class="hero-cta">
                 <a href="/register" class="btn-hero-primary">
-                    🚀 Start 14-Day Free Trial
+                    🚀 Start 7-Day Free Trial
                 </a>
                 <a href="/login" class="btn-hero-secondary">
                     🔑 Shop Owner Sign In
@@ -1078,7 +1078,7 @@
             <div class="section-header">
                 <span class="section-tag">Simple, Fair Pricing</span>
                 <h2>Choose the Right Plan for Your Business</h2>
-                <p>Start with a 14-day free trial. No credit card required. Upgrade whenever you are ready.</p>
+                <p>Start with a 7-day free trial. No credit card required. Upgrade whenever you are ready.</p>
             </div>
 
             <div class="pricing-grid">
@@ -1200,8 +1200,8 @@
     <footer>
         <div class="footer-container">
             <div class="footer-col">
-                <div style="display:flex; align-items:center; gap:8px; margin-bottom:14px;">
-                    <div style="width:32px; height:32px; border-radius:8px; background:#2563eb; display:flex; align-items:center; justify-content:center; color:white; font-weight:900;">⚡</div>
+                <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px;">
+                    <img src="{{ url_for('static', filename='billora-logo.jpg') }}" alt="Billora" style="width:34px; height:34px; object-fit:cover; border-radius:8px;">
                     <span style="font-size:20px; font-weight:900; color:white;">Billora</span>
                 </div>
                 <p style="font-size: 13px; color: #94a3b8; line-height: 1.7; max-width: 320px;">

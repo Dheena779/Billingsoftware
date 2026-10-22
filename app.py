@@ -19,6 +19,7 @@ from invoice import get_invoice_data
 from reports import reports_bp
 from settings import settings_bp, get_settings, format_datetime
 from founder import founder_bp
+from auth import auth_bp, generate_verification_token, send_verification_email
 
 
 app = Flask(
@@ -29,6 +30,7 @@ app = Flask(
 app.register_blueprint(reports_bp)
 app.register_blueprint(settings_bp)
 app.register_blueprint(founder_bp)
+app.register_blueprint(auth_bp)
 
 
 # ==================================================
@@ -101,8 +103,8 @@ def inject_branding():
 
     try:
         settings = get_settings()
-        base_data["store_name"] = settings["store_name"] or "Billing"
-        base_data["store_logo"] = settings["logo"] if settings["show_logo"] else ""
+        base_data["store_name"] = session.get("store_name") or settings.get("store_name") or "Store"
+        base_data["store_logo"] = settings.get("logo", "") if settings.get("show_logo") else ""
     except Exception:
         pass
 
@@ -149,6 +151,9 @@ def check_subscription_expiration():
         path.startswith("/api/subscription") or
         path.startswith("/api/payment") or
         path.startswith("/founder") or
+        path.startswith("/verify-email") or
+        path.startswith("/auth/") or
+        path.startswith("/resend-verification") or
         path in ["/", "/login", "/register", "/staff-login"]
     ):
         return None
@@ -285,7 +290,14 @@ def check_cloud_session():
         "/", "/login", "/register", "/api/register",
         "/about", "/terms", "/privacy", "/refund", "/refund-policy"
     ]
-    if request.path.startswith("/static") or request.path.startswith("/founder") or request.path in public_routes:
+    if (
+        request.path.startswith("/static") or
+        request.path.startswith("/founder") or
+        request.path.startswith("/verify-email") or
+        request.path.startswith("/auth/") or
+        request.path.startswith("/resend-verification") or
+        request.path in public_routes
+    ):
         return
 
     if not session.get("logged_in"):
@@ -306,6 +318,7 @@ def register():
         return redirect("/dashboard")
 
     if request.method == "POST":
+        import re
         store_name = request.form.get("store_name", "").strip()
         owner_name = request.form.get("owner_name", "").strip()
         email_or_phone = request.form.get("email_or_phone", "").strip()
@@ -318,7 +331,7 @@ def register():
         confirm_password = request.form.get("confirm_password", "")
 
         form_data = {
-            "store_name": store_name,
+            "form_store_name": store_name,
             "owner_name": owner_name,
             "email_or_phone": email_or_phone,
             "store_code": store_code,
@@ -337,7 +350,6 @@ def register():
 
         # Validate custom store code if provided
         if store_code:
-            import re
             if not re.match(r"^[A-Z0-9\-]{3,20}$", store_code):
                 return render_template(
                     "register.html",
@@ -354,10 +366,11 @@ def register():
                     **form_data
                 )
 
-        if len(password) < 4:
+        # Password strict combination: minimum 8 characters with letters and numbers
+        if len(password) < 8 or not re.search(r"[A-Za-z]", password) or not re.search(r"[0-9]", password):
             return render_template(
                 "register.html",
-                error="Password must be at least 4 characters.",
+                error="Password must be at least 8 characters and contain a combination of letters and numbers.",
                 **form_data
             )
 
@@ -383,24 +396,39 @@ def register():
                 **form_data
             )
 
+        is_google = session.get("google_verified", False) and session.get("google_email") == email_or_phone
+        is_email = "@" in email_or_phone
+
         try:
             res = register_new_store(
                 store_name, owner_name, email_or_phone, password,
                 city=city, state=state, address=address, business_type=business_category,
-                custom_store_code=store_code
+                custom_store_code=store_code,
+                email_verified=1 if (is_google or not is_email) else 0
             )
-            session.clear()
-            session["logged_in"] = True
-            session["user_id"] = res["user_id"]
-            session["store_id"] = res["store_id"]
-            session["store_code"] = res["store_code"]
-            session["store_name"] = res["store_name"]
-            session["username"] = res["username"]
-            session["owner_name"] = res["owner_name"]
-            session["business_category"] = res.get("business_category", business_category)
-            session["role"] = "admin"
-            session["last_active"] = int(time.time())
-            return redirect("/dashboard")
+
+            if is_google or not is_email:
+                # Direct login for Google accounts or phone registrations
+                session.clear()
+                session["logged_in"] = True
+                session["user_id"] = res["user_id"]
+                session["store_id"] = res["store_id"]
+                session["store_code"] = res["store_code"]
+                session["store_name"] = res["store_name"]
+                session["username"] = res["username"]
+                session["owner_name"] = res["owner_name"]
+                session["business_category"] = res.get("business_category", business_category)
+                session["role"] = "admin"
+                session["email_verified"] = True
+                session["last_active"] = int(time.time())
+                return redirect("/dashboard")
+            else:
+                # Verification email sent to Gmail
+                token = generate_verification_token(email_or_phone)
+                send_verification_email(email_or_phone, token, store_name=store_name)
+                session.clear()
+                return render_template("verify_sent.html", email=email_or_phone, token=token)
+
         except ValueError as ve:
             return render_template(
                 "register.html",
@@ -414,7 +442,16 @@ def register():
                 **form_data
             )
 
-    return render_template("register.html")
+    # GET request - pre-fill from Google if available
+    google_name = session.get("google_name", "")
+    google_email = session.get("google_email", "")
+
+    return render_template(
+        "register.html",
+        form_store_name="",
+        owner_name=google_name,
+        email_or_phone=google_email
+    )
 
 
 # ==================================================
@@ -493,7 +530,7 @@ def login():
                 )
 
             user = conn.execute("""
-                SELECT u.id, u.store_id, u.username, u.password, u.owner_name, u.role,
+                SELECT u.id, u.store_id, u.username, u.password, u.owner_name, u.role, u.email, u.email_verified,
                        s.store_name, s.store_code, s.plan_status, s.trial_ends_at
                 FROM users u
                 LEFT JOIN stores s ON s.id = u.store_id
@@ -503,6 +540,12 @@ def login():
         conn.close()
 
         if user and check_password_hash(user["password"], password):
+            # Check email verification for admin owners
+            if user["role"] == "admin" and user["email"] and not user["email_verified"]:
+                token = generate_verification_token(user["email"])
+                send_verification_email(user["email"], token, user["store_name"] or "your store")
+                return render_template("verify_sent.html", email=user["email"], token=token)
+
             FAILED_LOGINS.pop(address, None)
 
             session.clear()
@@ -918,7 +961,7 @@ def setup():
 def get_store_license_info(store_id=None):
     sid = store_id or session.get("store_id")
     if not sid:
-        return {"status": "trial", "message": "Cloud Billing", "days_left": 14, "is_active": True}
+        return {"status": "trial", "message": "Cloud Billing", "days_left": 7, "is_active": True}
 
     sub = get_store_subscription(sid)
     if sub["plan_status"] == "active":

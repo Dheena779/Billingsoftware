@@ -44,7 +44,7 @@
 <nav class="global-navbar">
     <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
         <a class="global-brand" href="{% if session.get('role') == 'staff' %}/billing{% else %}/dashboard{% endif %}" style="display:flex; align-items:center; gap:8px;">
-            <span style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color:white; font-size:15px; font-weight:900; padding:3px 7px; border-radius:6px; box-shadow:0 2px 6px rgba(37,99,235,0.3);">⚡</span>
+            <img src="{{ url_for('static', filename='billora-logo.jpg') }}" alt="Billora" style="width:28px; height:28px; object-fit:cover; border-radius:7px; box-shadow:0 2px 6px rgba(37,99,235,0.3);">
             <span>Billora</span>
         </a>
         <div style="display:flex; align-items:center; gap:6px; padding-left:10px; border-left:1.5px solid #e5e7eb;">
