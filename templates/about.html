@@ -171,8 +171,8 @@
     {% include 'navbar.html' %}
 {% else %}
 <header style="padding: 16px 28px; background: white; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
-    <a href="/" style="text-decoration: none; font-size: 22px; font-weight: 900; color: #0f172a; display: flex; align-items: center; gap: 8px;">
-        <span style="background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); color:white; font-size:16px; font-weight:900; padding:4px 8px; border-radius:8px;">⚡</span>
+    <a href="/" style="text-decoration: none; font-size: 22px; font-weight: 900; color: #0f172a; display: flex; align-items: center; gap: 12px;">
+        <img src="{{ url_for('static', filename='billora-logo.jpg') }}" alt="Billora" style="width: 36px; height: 36px; object-fit: contain; border-radius: 10px; box-shadow: 0 2px 8px rgba(37,99,235,0.15);">
         Billora
     </a>
     <div>
@@ -264,8 +264,13 @@
     </div>
 </div>
 
-<footer style="text-align: center; padding: 24px 20px; color: #64748b; font-size: 13px; border-top: 1px solid #e2e8f0; background: white;">
-    &copy; 2026 Billora. Designed and Developed by <strong>Dheena</strong>, Vellore.
+<footer style="text-align: center; padding: 32px 20px; color: #64748b; font-size: 13px; border-top: 1px solid #e2e8f0; background: white;">
+    &copy; 2026 Billora. Founded by <strong>Dheena</strong>, Vellore. | 
+    <a href="/about" style="color: #475569; text-decoration: none; margin: 0 10px; font-weight: 600;">About Us</a> | 
+    <a href="/terms" style="color: #475569; text-decoration: none; margin: 0 10px; font-weight: 600;">Terms &amp; Conditions</a> | 
+    <a href="/privacy" style="color: #475569; text-decoration: none; margin: 0 10px; font-weight: 600;">Privacy Policy</a> | 
+    <a href="/refund" style="color: #475569; text-decoration: none; margin: 0 10px; font-weight: 600;">Refund Policy</a> | 
+    <a href="/contact" style="color: #475569; text-decoration: none; margin: 0 10px; font-weight: 600;">Contact Founder</a>
 </footer>
 
 </body>

@@ -146,6 +146,7 @@ def check_subscription_expiration():
         path.startswith("/terms") or
         path.startswith("/privacy") or
         path.startswith("/refund") or
+        path.startswith("/contact") or
         path.startswith("/static") or
         path.startswith("/logout") or
         path.startswith("/api/subscription") or
@@ -165,7 +166,7 @@ def check_subscription_expiration():
             if path.startswith("/api/"):
                 return jsonify({
                     "success": False,
-                    "error": "Your trial or subscription has expired. Please activate Pro (₹5 for 30 mins) or contact founder Dheena (+91 7502399148).",
+                    "error": "Your trial or subscription has expired. Please upgrade to Pro or contact founder Dheena (deenadayalan779@gmail.com).",
                     "expired": True
                 }), 403
             return redirect("/subscription?expired=1")
@@ -288,7 +289,7 @@ def check_cloud_session():
     # Public routes that don't need login
     public_routes = [
         "/", "/login", "/register", "/api/register",
-        "/about", "/terms", "/privacy", "/refund", "/refund-policy"
+        "/about", "/terms", "/privacy", "/refund", "/refund-policy", "/contact"
     ]
     if (
         request.path.startswith("/static") or
@@ -4456,7 +4457,7 @@ def api_payment_create_order():
     if not client or not key_id:
         return jsonify({
             "success": False,
-            "error": "Razorpay API keys not yet configured. Please add your Key ID and Secret in data/razorpay.json or contact founder Dheena (+91 7502399148).",
+            "error": "Razorpay API keys not yet configured. Please configure your payment credentials in Founder Dashboard or contact founder Dheena (deenadayalan779@gmail.com).",
             "keys_missing": True
         }), 400
 
@@ -4584,6 +4585,11 @@ def privacy_page():
 @app.route("/refund-policy")
 def refund_page():
     return render_template("refund.html")
+
+
+@app.route("/contact")
+def contact_page():
+    return render_template("contact.html")
 
 
 # ==================================================

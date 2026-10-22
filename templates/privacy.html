@@ -3,40 +3,103 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Privacy Policy - Cloud Billing Software</title>
+    <title>Privacy Policy - Billora Cloud Billing</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" type="image/jpeg" href="{{ url_for('static', filename='billora-logo.jpg') }}">
     <style>
-        .policy-container {
-            max-width: 860px;
-            margin: 40px auto 80px auto;
-            padding: 0 24px;
+        body {
+            background: #f8fafc;
+            margin: 0;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             color: #1e293b;
+        }
+        .policy-header {
+            padding: 16px 28px;
+            background: white;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+        }
+        .brand-link {
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #0f172a;
+            font-size: 20px;
+            font-weight: 900;
+            letter-spacing: -0.5px;
+        }
+        .brand-logo {
+            width: 36px;
+            height: 36px;
+            object-fit: contain;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(37,99,235,0.15);
+        }
+        .policy-container {
+            max-width: 880px;
+            margin: 40px auto 80px auto;
+            padding: 0 20px;
             line-height: 1.7;
         }
         .policy-card {
             background: white;
-            border-radius: 16px;
-            padding: 40px;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            border-radius: 20px;
+            padding: 42px 38px;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05), 0 8px 10px -6px rgba(0,0,0,0.02);
             border: 1px solid #e2e8f0;
         }
-        h1 { font-size: 28px; font-weight: 800; color: #0f172a; margin-bottom: 8px; }
-        h2 { font-size: 18px; font-weight: 700; color: #1e3a8a; margin-top: 28px; margin-bottom: 10px; }
-        p, li { font-size: 14px; color: #475569; }
-        .last-updated { font-size: 13px; color: #64748b; margin-bottom: 24px; }
+        h1 { font-size: 30px; font-weight: 900; color: #0f172a; margin: 0 0 8px 0; letter-spacing: -0.5px; }
+        .last-updated { font-size: 13px; color: #64748b; margin-bottom: 26px; font-weight: 500; }
+        h2 { font-size: 19px; font-weight: 800; color: #1e40af; margin-top: 32px; margin-bottom: 10px; }
+        p, li { font-size: 14.5px; color: #475569; }
+        ul { padding-left: 20px; }
+        .founder-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin-top: 18px;
+        }
+        .footer-nav {
+            text-align: center;
+            padding: 32px 20px;
+            color: #64748b;
+            font-size: 13px;
+            border-top: 1px solid #e2e8f0;
+            background: white;
+        }
+        .footer-nav a {
+            color: #475569;
+            text-decoration: none;
+            margin: 0 10px;
+            font-weight: 600;
+        }
+        .footer-nav a:hover {
+            color: #2563eb;
+        }
+        @media (max-width: 640px) {
+            .policy-card { padding: 26px 20px; }
+            h1 { font-size: 24px; }
+        }
     </style>
 </head>
-<body style="background: #f8fafc; margin: 0;">
+<body>
 
 {% if session.get('logged_in') %}
     {% include 'navbar.html' %}
 {% else %}
-<header style="padding: 16px 28px; background: white; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
-    <a href="/" style="text-decoration: none; font-size: 20px; font-weight: 800; color: #0f172a;">⚡ Cloud <span>Billing</span></a>
+<header class="policy-header">
+    <a href="/" class="brand-link">
+        <img src="{{ url_for('static', filename='billora-logo.jpg') }}" alt="Billora" class="brand-logo">
+        Billora
+    </a>
     <div>
         <a href="/login" style="color: #475569; text-decoration: none; font-weight: 600; margin-right: 16px; font-size: 14px;">Sign In</a>
-        <a href="/register" style="background: #2563eb; color: white; text-decoration: none; font-weight: 700; padding: 8px 16px; border-radius: 8px; font-size: 14px;">Start Free Trial</a>
+        <a href="/register" style="background: #2563eb; color: white; text-decoration: none; font-weight: 700; padding: 9px 18px; border-radius: 9px; font-size: 14px; box-shadow: 0 2px 6px rgba(37,99,235,0.25);">Start 7-Day Free Trial</a>
     </div>
 </header>
 {% endif %}
@@ -44,41 +107,60 @@
 <div class="policy-container">
     <div class="policy-card">
         <h1>Privacy Policy</h1>
-        <div class="last-updated">Last Updated: October 2026</div>
+        <div class="last-updated">Last Updated: October 2026 | Effective Date: October 2026</div>
 
-        <p>This Privacy Policy describes how <strong>Cloud Billing Software</strong> (operated by <strong>Dheena</strong>, Vellore, Tamil Nadu) collects, protects, and uses the information you provide when using our SaaS platform.</p>
+        <p>
+            At <strong>Billora</strong> (founded and operated by <strong>Dheena</strong>, headquartered in Vellore, Tamil Nadu, India), we are committed to respecting and protecting the privacy of store owners, cashiers, and your store customers. This Privacy Policy outlines our data handling practices for our cloud billing and retail management platform.
+        </p>
 
         <h2>1. Information We Collect</h2>
         <ul>
-            <li><strong>Store Account Data:</strong> Business Name, Owner Name, Contact Mobile Number, Email Address, City, and State.</li>
-            <li><strong>Operational Store Data:</strong> Products, barcodes, stock quantities, invoices, customer purchase records, and staff attendance records.</li>
-            <li><strong>Transaction Records:</strong> Payment IDs and order identifiers processed securely via Razorpay (we do NOT store credit/debit card numbers or UPI PINs on our servers).</li>
+            <li><strong>Store Account Information:</strong> Business Name, Owner Name, Store Code, City, State, and Google / Gmail Address used for account authentication and verification.</li>
+            <li><strong>Store Operations Data:</strong> Products, barcodes, stock quantities, purchase costs, retail selling prices, invoices, customer purchase histories, and staff attendance logs.</li>
+            <li><strong>Payment &amp; Transaction Identifiers:</strong> Razorpay Payment IDs and Order IDs associated with your license activation. We <strong>never store or have access to</strong> your bank accounts, debit/credit card CVVs, or UPI PINs.</li>
         </ul>
 
-        <h2>2. How We Use Your Information</h2>
-        <p>We use your information strictly to:</p>
+        <h2>2. Strict Multi-Tenant Data Isolation</h2>
+        <p>
+            Billora is engineered with strict multi-tenant architecture. Every database query, sales report, product inventory, and bill receipt is partitioned exclusively by your unique <code>store_id</code>. Under no circumstances can any other store access or view your sales revenue, customer data, or product pricing.
+        </p>
+
+        <h2>3. How We Use Your Information</h2>
+        <p>Your business information is strictly used to:</p>
         <ul>
-            <li>Provide and operate your cloud billing terminal and dashboard.</li>
-            <li>Process license activation keys and subscription renewals.</li>
-            <li>Provide customer support and technical troubleshooting.</li>
+            <li>Maintain, operate, and optimize your cloud billing terminals and reports.</li>
+            <li>Send email verification links to authenticate and secure your store account.</li>
+            <li>Issue single-use license keys upon successful Razorpay subscription payments.</li>
+            <li>Provide direct founder customer support and resolve technical queries.</li>
         </ul>
 
-        <h2>3. Data Protection &amp; Multi-Tenant Isolation</h2>
-        <p>We implement multi-tenant database isolation. Each store's records are strictly partitioned by store ID, preventing cross-store data leakage.</p>
+        <h2>4. Zero Data Selling &amp; Third-Party Policy</h2>
+        <p>
+            We <strong>never sell, rent, or trade</strong> your business, sales, or customer data to marketing agencies, ad brokers, or third parties. Your data belongs solely to your store.
+        </p>
 
-        <h2>4. Contact Information</h2>
-        <p>For any privacy-related questions or data deletion requests, contact:</p>
-        <ul>
-            <li><strong>Owner:</strong> Dheena</li>
-            <li><strong>Address:</strong> Vellore, Tamil Nadu, India</li>
-            <li><strong>Phone:</strong> +91 7502399148</li>
-            <li><strong>Email:</strong> deenadayalan779@gmail.com</li>
-        </ul>
+        <h2>5. Data Security &amp; Retention</h2>
+        <p>
+            All passwords are protected using industry-standard one-way cryptographic hashing (PBKDF2/SHA-256). All communications between your devices and Billora servers are secured using SSL/TLS encryption. Store data is retained safely on persistent storage and will only be deleted upon your explicit request.
+        </p>
+
+        <h2>6. Contact Founder for Privacy Inquiries</h2>
+        <p>For any privacy-related questions, data export, or deletion requests, contact Founder Dheena directly:</p>
+        <div class="founder-box">
+            <p style="margin: 0 0 6px 0;"><strong>Founder &amp; Owner:</strong> Dheena</p>
+            <p style="margin: 0 0 6px 0;"><strong>Official Email:</strong> <a href="mailto:deenadayalan779@gmail.com" style="color: #2563eb; font-weight: 700;">deenadayalan779@gmail.com</a></p>
+            <p style="margin: 0;"><strong>Headquarters:</strong> Vellore, Tamil Nadu, India</p>
+        </div>
     </div>
 </div>
 
-<footer style="text-align: center; padding: 24px; color: #64748b; font-size: 13px;">
-    &copy; 2026 Cloud Billing Software. Founder Dheena, Vellore. | <a href="/terms">Terms</a> | <a href="/privacy">Privacy</a> | <a href="/refund">Refund Policy</a>
+<footer class="footer-nav">
+    &copy; 2026 Billora. Founded by <strong>Dheena</strong>, Vellore. | 
+    <a href="/about">About Us</a> | 
+    <a href="/terms">Terms &amp; Conditions</a> | 
+    <a href="/privacy">Privacy Policy</a> | 
+    <a href="/refund">Refund Policy</a> | 
+    <a href="/contact">Contact Founder</a>
 </footer>
 
 </body>

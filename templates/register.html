@@ -1,203 +1,526 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Store - Billora Cloud Billing</title>
+    <title>Create Your Store - Billora Cloud Billing</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" type="image/jpeg" href="{{ url_for('static', filename='billora-logo.jpg') }}">
     <style>
-        .register-card {
-            background: #ffffff;
-            border-radius: 16px;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 460px;
-            padding: 36px 32px;
-            margin: 20px auto;
+        * {
+            box-sizing: border-box;
         }
-        .badge-free {
-            display: inline-block;
-            background: #dcfce7;
-            color: #15803d;
-            font-size: 12px;
-            font-weight: 700;
-            padding: 4px 10px;
+        body.register-body {
+            margin: 0;
+            padding: 40px 16px 80px 16px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            background: radial-gradient(circle at 15% 15%, #eff6ff 0%, #f8fafc 50%, #e0e7ff 100%);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            color: #0f172a;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Top Brand Bar */
+        .register-top-nav {
+            width: 100%;
+            max-width: 540px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            animation: fadeInDown 0.5s ease-out;
+        }
+        .top-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: #0f172a;
+            font-weight: 900;
+            font-size: 20px;
+            letter-spacing: -0.5px;
+        }
+        .top-brand-logo {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            object-fit: contain;
+            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);
+        }
+        .top-login-link {
+            font-size: 13.5px;
+            color: #475569;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.2s;
+        }
+        .top-login-link:hover {
+            color: #2563eb;
+        }
+
+        /* Main Registration Card */
+        .register-card-modern {
+            background: #ffffff;
+            border-radius: 24px;
+            box-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.08), 0 0 1px 1px rgba(15, 23, 42, 0.05);
+            width: 100%;
+            max-width: 540px;
+            padding: 40px 38px;
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            animation: cardSlideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+        }
+
+        /* Animated Logo Badge */
+        .logo-header {
+            text-align: center;
+            margin-bottom: 26px;
+        }
+        .logo-badge-container {
+            width: 72px;
+            height: 72px;
+            margin: 0 auto 14px auto;
             border-radius: 20px;
-            margin-bottom: 12px;
+            background: #ffffff;
+            box-shadow: 0 12px 28px -6px rgba(37, 99, 235, 0.22), 0 0 0 1px rgba(37, 99, 235, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            animation: floatLogo 4s ease-in-out infinite;
+        }
+        .logo-badge-container:hover {
+            transform: translateY(-4px) scale(1.03);
+            box-shadow: 0 16px 32px -6px rgba(37, 99, 235, 0.3);
+        }
+        .logo-badge-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 14px;
+        }
+
+        .badge-trial {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+            color: #15803d;
+            font-size: 11.5px;
+            font-weight: 800;
+            padding: 4px 12px;
+            border-radius: 20px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            box-shadow: 0 2px 6px rgba(22, 101, 52, 0.08);
+            margin-bottom: 10px;
+        }
+        .title-main {
+            font-size: 26px;
+            font-weight: 900;
+            color: #0f172a;
+            margin: 0 0 6px 0;
+            letter-spacing: -0.6px;
+        }
+        .subtitle-main {
+            color: #64748b;
+            font-size: 14.5px;
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        /* Google OAuth Button */
+        .btn-google-signup {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            width: 100%;
+            padding: 13px 18px;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 12px;
+            background: #ffffff;
+            color: #1e293b;
+            font-size: 14.5px;
+            font-weight: 700;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+            margin-top: 20px;
+        }
+        .btn-google-signup:hover {
+            background: #f8fafc;
+            border-color: #2563eb;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 18px rgba(37, 99, 235, 0.12);
+        }
+
+        /* Divider */
+        .form-divider {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin: 22px 0 20px 0;
+        }
+        .form-divider div {
+            flex: 1;
+            height: 1px;
+            background: #e2e8f0;
+        }
+        .form-divider span {
+            font-size: 12px;
+            color: #94a3b8;
+            font-weight: 700;
+            text-transform: uppercase;
             letter-spacing: 0.5px;
         }
-        .input-group {
+
+        /* Section Subheaders inside Form */
+        .form-section-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12.5px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            color: #2563eb;
+            margin: 20px 0 12px 0;
+            padding-bottom: 6px;
+            border-bottom: 1px dashed #e2e8f0;
+        }
+
+        /* Form Inputs */
+        .form-group {
             margin-bottom: 16px;
             text-align: left;
         }
-        .input-group label {
+        .form-group label {
             display: block;
             font-size: 13px;
-            font-weight: 600;
-            color: #374151;
+            font-weight: 700;
+            color: #334155;
             margin-bottom: 6px;
         }
-        .input-group input {
+        .form-group label small {
+            font-weight: 500;
+            color: #64748b;
+        }
+        .form-control {
             width: 100%;
-            padding: 10px 14px;
-            border: 1px solid #d1d5db;
-            border-radius: 8px;
+            padding: 11px 14px;
+            border: 1.5px solid #d1d5db;
+            border-radius: 10px;
             font-size: 14px;
             box-sizing: border-box;
-            transition: border-color 0.2s;
+            background: #ffffff;
+            color: #0f172a;
+            transition: all 0.2s ease;
         }
-        .input-group input:focus {
+        .form-control:focus {
             outline: none;
             border-color: #2563eb;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+            background: #fafcff;
         }
-        .error-banner {
-            background: #fee2e2;
-            color: #b91c1c;
-            padding: 10px 14px;
-            border-radius: 8px;
-            font-size: 13px;
-            margin-bottom: 18px;
+        .form-control::placeholder {
+            color: #94a3b8;
+        }
+        .form-help {
+            display: block;
+            font-size: 11.5px;
+            color: #64748b;
+            margin-top: 5px;
+            line-height: 1.4;
+        }
+
+        /* Two Column Layouts */
+        .form-row-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        /* Submit Button */
+        .btn-create-store {
+            width: 100%;
+            padding: 14px 20px;
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 15.5px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.28);
+            margin-top: 14px;
+            letter-spacing: -0.2px;
+        }
+        .btn-create-store:hover {
+            background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 26px rgba(37, 99, 235, 0.35);
+        }
+        .btn-create-store:active {
+            transform: translateY(0);
+        }
+
+        /* Error Banner */
+        .error-banner-modern {
+            background: #fef2f2;
             border: 1px solid #fecaca;
+            color: #991b1b;
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 13.5px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: shake 0.4s ease;
+        }
+
+        /* Footer inside Card */
+        .card-footer-auth {
+            margin-top: 24px;
+            text-align: center;
+            font-size: 13.5px;
+            color: #64748b;
+            border-top: 1px solid #f1f5f9;
+            padding-top: 18px;
+        }
+        .card-footer-auth a {
+            color: #2563eb;
+            font-weight: 700;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .card-footer-auth a:hover {
+            color: #1d4ed8;
+            text-decoration: underline;
+        }
+
+        /* Animations */
+        @keyframes cardSlideUp {
+            from { opacity: 0; transform: translateY(24px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes floatLogo {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-4px); }
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-4px); }
+            40%, 80% { transform: translateX(4px); }
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 640px) {
+            body.register-body {
+                padding: 20px 12px 40px 12px;
+            }
+            .register-card-modern {
+                padding: 28px 20px;
+                border-radius: 20px;
+            }
+            .form-row-2col {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+            .title-main {
+                font-size: 22px;
+            }
+            .logo-badge-container {
+                width: 64px;
+                height: 64px;
+            }
         }
     </style>
 </head>
-<body class="login-page">
+<body class="register-body">
 
-<div class="register-card">
-    <div class="logo" style="margin-bottom: 24px;">
-        <img src="{{ url_for('static', filename='billora-logo.jpg') }}" alt="Billora" style="width: 80px; height: auto; border-radius: 16px; margin-bottom: 8px;">
-        <span class="badge-free">✨ 7-DAY FREE TRIAL</span>
-        <h1 style="font-size: 24px; font-weight: 900; color: #111827; margin: 4px 0 6px 0; letter-spacing: -0.5px;">Start with Billora</h1>
-        <p style="color: #6b7280; font-size: 14px; margin: 0;">Create your cloud billing store in 30 seconds</p>
+    <!-- Top Navigation Header -->
+    <div class="register-top-nav">
+        <a href="/" class="top-brand">
+            <img src="{{ url_for('static', filename='billora-logo.jpg') }}" alt="Billora" class="top-brand-logo">
+            Billora
+        </a>
+        <a href="/login" class="top-login-link">
+            Already registered? <strong style="color: #2563eb;">Sign In →</strong>
+        </a>
     </div>
 
-    <!-- GOOGLE SIGN-UP BUTTON -->
-    <a href="/auth/google?action=register" id="googleBtn" onclick="handleGoogleAuthClick(event)" style="display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 13px; border: 1.5px solid #d1d5db; border-radius: 10px; background: #ffffff; color: #1f2937; font-size: 15px; font-weight: 700; text-decoration: none; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.04);"
-       onmouseover="this.style.background='#f9fafb'; this.style.borderColor='#2563eb'; this.style.boxShadow='0 4px 12px rgba(37,99,235,0.15)';"
-       onmouseout="this.style.background='#ffffff'; this.style.borderColor='#d1d5db'; this.style.boxShadow='0 2px 4px rgba(0,0,0,0.04)';">
-        <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
-        Use Google Account
-    </a>
-
-    <div style="display: flex; align-items: center; gap: 12px; margin: 18px 0;">
-        <div style="flex: 1; height: 1px; background: #e5e7eb;"></div>
-        <span style="font-size: 12px; color: #9ca3af; font-weight: 600;">or register manually</span>
-        <div style="flex: 1; height: 1px; background: #e5e7eb;"></div>
-    </div>
-
-    {% if error %}
-    <div class="error-banner">
-        ⚠️ {{ error }}
-    </div>
-    {% endif %}
-
-    <form method="POST" action="/register">
-        <div class="input-group">
-            <label for="store_name">Store / Business Name *</label>
-            <input type="text" id="store_name" name="store_name" placeholder="e.g. John Stores" value="{{ form_store_name or '' }}" required autofocus oninput="suggestStoreCode(this.value)">
-        </div>
-
-        <div class="input-group">
-            <label for="store_code">
-                Custom Store Code * 
-                <small style="font-weight:400; color:#6b7280;">(Letters - Numbers, e.g. FRESH-101)</small>
-            </label>
-            <input type="text" id="store_code" name="store_code" placeholder="e.g. JOHN-101" value="{{ store_code or '' }}" style="text-transform:uppercase; font-family:monospace; font-weight:700; letter-spacing:1px;" required>
-            <small style="color: #6b7280; font-size: 11px; margin-top: 4px; display: block;">
-                Unique code for your store. Used for cashier login and printed on bills.
-            </small>
-        </div>
-
-        <div class="input-group">
-            <label for="business_category">Business Type / Category</label>
-            <select id="business_category" name="business_category" style="width: 100%; padding: 10px 14px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; box-sizing: border-box; background: white; color: #111827;">
-                <option value="Grocery / Supermarket" {% if business_category == 'Grocery / Supermarket' %}selected{% endif %}>🛒 Grocery / Supermarket</option>
-                <option value="Retail Store" {% if business_category == 'Retail Store' %}selected{% endif %}>🛍️ Retail Store</option>
-                <option value="Clothing & Apparel" {% if business_category == 'Clothing & Apparel' %}selected{% endif %}>👕 Clothing &amp; Apparel</option>
-                <option value="Electronics & Mobile" {% if business_category == 'Electronics & Mobile' %}selected{% endif %}>📱 Electronics &amp; Mobile</option>
-                <option value="Pharmacy & Medical" {% if business_category == 'Pharmacy & Medical' %}selected{% endif %}>💊 Pharmacy &amp; Medical</option>
-                <option value="Bakery & Cafe" {% if business_category == 'Bakery & Cafe' %}selected{% endif %}>☕ Restaurant / Bakery / Cafe</option>
-                <option value="Hardware & Sanitary" {% if business_category == 'Hardware & Sanitary' %}selected{% endif %}>🔧 Hardware &amp; Electrical</option>
-                <option value="Other" {% if business_category == 'Other' %}selected{% endif %}>🏢 Other Business</option>
-            </select>
-        </div>
-
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-            <div class="input-group">
-                <label for="city">City / Town</label>
-                <input type="text" id="city" name="city" placeholder="e.g. Chennai, Vellore" value="{{ city or '' }}">
+    <!-- Main Register Container -->
+    <div class="register-card-modern">
+        <div class="logo-header">
+            <div class="logo-badge-container">
+                <img src="{{ url_for('static', filename='billora-logo.jpg') }}" alt="Billora Cloud Billing">
             </div>
-            <div class="input-group">
-                <label for="state">State</label>
-                <input type="text" id="state" name="state" placeholder="e.g. Tamil Nadu" value="{{ state or '' }}">
+            <div>
+                <span class="badge-trial">✨ 7-Day Free Trial</span>
             </div>
+            <h1 class="title-main">Create Your Store</h1>
+            <p class="subtitle-main">Start fast cloud billing, thermal receipts &amp; inventory</p>
         </div>
 
-        <div class="input-group">
-            <label for="address">Store Address <span style="font-weight:400; color:#9ca3af;">(optional)</span></label>
-            <input type="text" id="address" name="address" placeholder="e.g. 12/4 Bazaar Street" value="{{ address or '' }}">
-        </div>
-
-        <div class="input-group">
-            <label for="owner_name">Your Name (Owner) *</label>
-            <input type="text" id="owner_name" name="owner_name" placeholder="e.g. John Doe" value="{{ owner_name or '' }}" required>
-        </div>
-
-        <div class="input-group">
-            <label for="email_or_phone">Google Account / Gmail Address *</label>
-            <input type="email" id="email_or_phone" name="email_or_phone" placeholder="e.g. yourstore@gmail.com" value="{{ email_or_phone or '' }}" required>
-            <small style="color: #6b7280; font-size: 11px; margin-top: 4px; display: block;">
-                Must be a valid Google Account (Gmail). A verification link will be sent to your Gmail to activate your store.
-            </small>
-        </div>
-
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-            <div class="input-group">
-                <label for="password">Password * <small style="color:#6b7280; font-weight:400;">(Letters &amp; Numbers)</small></label>
-                <input type="password" id="password" name="password" placeholder="Min 8 chars (letters+numbers)" required minlength="8">
-            </div>
-
-            <div class="input-group">
-                <label for="confirm_password">Confirm Password *</label>
-                <input type="password" id="confirm_password" name="confirm_password" placeholder="Re-type password" required minlength="8">
-            </div>
-        </div>
-
-        <button type="submit" class="primary-button" style="width: 100%; padding: 12px; font-size: 15px; font-weight: 700; border-radius: 8px; cursor: pointer; margin-top: 8px;">
-            🚀 Create Store & Start Free Trial
-        </button>
-    </form>
-
-    <div style="margin-top: 24px; text-align: center; font-size: 13px; color: #6b7280; border-top: 1px solid #e5e7eb; padding-top: 18px;">
-        Already have a store account? 
-        <a href="/login" style="color: #2563eb; font-weight: 600; text-decoration: none;">Login here</a>
-    </div>
-</div>
-
-<!-- GOOGLE ACCOUNT MODAL -->
-<div id="googleAuthModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:9999; align-items:center; justify-content:center; padding:16px;">
-    <div style="background:white; border-radius:20px; max-width:420px; width:100%; padding:32px 26px; box-shadow:0 25px 50px -12px rgba(0,0,0,0.25); text-align:center; position:relative;">
-        <button type="button" onclick="closeGoogleModal()" style="position:absolute; right:16px; top:16px; border:none; background:transparent; font-size:22px; cursor:pointer; color:#9ca3af;">✕</button>
-        
-        <div style="display:inline-flex; align-items:center; justify-content:center; width:56px; height:56px; border-radius:50%; background:#f8fafc; border:1px solid #e2e8f0; margin-bottom:16px; box-shadow:0 4px 10px rgba(0,0,0,0.05);">
-            <svg width="28" height="28" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
-        </div>
-
-        <h3 style="margin:0 0 6px 0; font-size:20px; font-weight:800; color:#111827;">Sign in with Google</h3>
-        <p style="margin:0 0 18px 0; font-size:13px; color:#6b7280; line-height:1.5;">Enter your Google Account (Gmail) to authenticate and create your Billora store:</p>
-
-        <div style="text-align:left; margin-bottom:16px;">
-            <label style="display:block; font-size:13px; font-weight:700; color:#374151; margin-bottom:6px;">Google Email Address</label>
-            <input type="email" id="modalGoogleEmail" placeholder="yourname@gmail.com" autofocus style="width:100%; padding:11px 14px; border:1px solid #d1d5db; border-radius:8px; font-size:14px; box-sizing:border-box;">
-            <div id="modalGoogleError" style="display:none; color:#dc2626; font-size:12px; margin-top:5px;">Please enter a valid Gmail address (@gmail.com).</div>
-        </div>
-
-        <button type="button" onclick="connectGoogleEmail()" style="width:100%; padding:13px; background:#2563eb; color:white; border:none; border-radius:10px; font-size:14px; font-weight:700; cursor:pointer; box-shadow:0 4px 12px rgba(37,99,235,0.25);">
+        <!-- Google 1-Click Signup Button -->
+        <a href="/auth/google?action=register" id="googleBtn" onclick="handleGoogleAuthClick(event)" class="btn-google-signup">
+            <svg width="20" height="20" viewBox="0 0 48 48">
+                <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+            </svg>
             Continue with Google Account
-        </button>
+        </a>
+
+        <div class="form-divider">
+            <div></div>
+            <span>or fill store details</span>
+            <div></div>
+        </div>
+
+        {% if error %}
+        <div class="error-banner-modern">
+            <span>⚠️</span>
+            <span>{{ error }}</span>
+        </div>
+        {% endif %}
+
+        <form method="POST" action="/register">
+            <!-- SECTION 1: STORE PROFILE -->
+            <div class="form-section-title">
+                <span>🏬</span> Store Profile
+            </div>
+
+            <div class="form-group">
+                <label for="store_name">Store / Business Name *</label>
+                <input type="text" id="store_name" name="store_name" class="form-control" placeholder="e.g. John Stores" value="{{ form_store_name or '' }}" required autofocus oninput="suggestStoreCode(this.value)">
+            </div>
+
+            <div class="form-group">
+                <label for="store_code">
+                    Custom Store Code * 
+                    <small>(Letters - Numbers, e.g. FRESH-101)</small>
+                </label>
+                <input type="text" id="store_code" name="store_code" class="form-control" placeholder="e.g. JOHN-101" value="{{ store_code or '' }}" style="text-transform:uppercase; font-family:monospace; font-weight:800; letter-spacing:1px; color:#2563eb;" required>
+                <small class="form-help">
+                    Unique identifier for your store. Used for cashier login and printed on your bills.
+                </small>
+            </div>
+
+            <div class="form-group">
+                <label for="business_category">Business Type / Category</label>
+                <select id="business_category" name="business_category" class="form-control">
+                    <option value="Grocery / Supermarket" {% if business_category == 'Grocery / Supermarket' %}selected{% endif %}>🛒 Grocery / Supermarket</option>
+                    <option value="Retail Store" {% if business_category == 'Retail Store' %}selected{% endif %}>🛍️ Retail Store</option>
+                    <option value="Clothing & Apparel" {% if business_category == 'Clothing & Apparel' %}selected{% endif %}>👕 Clothing &amp; Apparel</option>
+                    <option value="Electronics & Mobile" {% if business_category == 'Electronics & Mobile' %}selected{% endif %}>📱 Electronics &amp; Mobile</option>
+                    <option value="Pharmacy & Medical" {% if business_category == 'Pharmacy & Medical' %}selected{% endif %}>💊 Pharmacy &amp; Medical</option>
+                    <option value="Bakery & Cafe" {% if business_category == 'Bakery & Cafe' %}selected{% endif %}>☕ Restaurant / Bakery / Cafe</option>
+                    <option value="Hardware & Sanitary" {% if business_category == 'Hardware & Sanitary' %}selected{% endif %}>🔧 Hardware &amp; Electrical</option>
+                    <option value="Other" {% if business_category == 'Other' %}selected{% endif %}>🏢 Other Business</option>
+                </select>
+            </div>
+
+            <div class="form-row-2col">
+                <div class="form-group">
+                    <label for="city">City / Town</label>
+                    <input type="text" id="city" name="city" class="form-control" placeholder="e.g. Chennai, Vellore" value="{{ city or '' }}">
+                </div>
+                <div class="form-group">
+                    <label for="state">State</label>
+                    <input type="text" id="state" name="state" class="form-control" placeholder="e.g. Tamil Nadu" value="{{ state or '' }}">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="address">Store Address <small>(optional)</small></label>
+                <input type="text" id="address" name="address" class="form-control" placeholder="e.g. 12/4 Bazaar Street" value="{{ address or '' }}">
+            </div>
+
+            <!-- SECTION 2: OWNER ACCOUNT -->
+            <div class="form-section-title" style="margin-top: 24px;">
+                <span>👤</span> Owner Account Credentials
+            </div>
+
+            <div class="form-group">
+                <label for="owner_name">Your Name (Owner) *</label>
+                <input type="text" id="owner_name" name="owner_name" class="form-control" placeholder="e.g. John Doe" value="{{ owner_name or '' }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="email_or_phone">Google Account / Gmail Address *</label>
+                <input type="email" id="email_or_phone" name="email_or_phone" class="form-control" placeholder="e.g. yourstore@gmail.com" value="{{ email_or_phone or '' }}" required>
+                <small class="form-help">
+                    Must be a valid Google Account (Gmail). An activation link will be sent to your Gmail inbox.
+                </small>
+            </div>
+
+            <div class="form-row-2col">
+                <div class="form-group">
+                    <label for="password">Password * <small>(letters+numbers)</small></label>
+                    <input type="password" id="password" name="password" class="form-control" placeholder="Min 8 chars" required minlength="8">
+                </div>
+
+                <div class="form-group">
+                    <label for="confirm_password">Confirm Password *</label>
+                    <input type="password" id="confirm_password" name="confirm_password" class="form-control" placeholder="Re-type password" required minlength="8">
+                </div>
+            </div>
+
+            <button type="submit" class="btn-create-store">
+                🚀 Create Store &amp; Start 7-Day Free Trial
+            </button>
+        </form>
+
+        <div class="card-footer-auth">
+            Already have a store account? 
+            <a href="/login">Sign in here →</a>
+        </div>
     </div>
-</div>
+
+    <!-- GOOGLE ACCOUNT MODAL -->
+    <div id="googleAuthModal" style="display:none; position:fixed; inset:0; background:rgba(15,23,42,0.6); backdrop-filter:blur(4px); z-index:9999; align-items:center; justify-content:center; padding:16px;">
+        <div style="background:white; border-radius:24px; max-width:420px; width:100%; padding:36px 30px; box-shadow:0 25px 50px -12px rgba(0,0,0,0.3); text-align:center; position:relative; animation:cardSlideUp 0.3s cubic-bezier(0.16,1,0.3,1);">
+            <button type="button" onclick="closeGoogleModal()" style="position:absolute; right:18px; top:18px; border:none; background:transparent; font-size:22px; cursor:pointer; color:#94a3b8; line-height:1;">✕</button>
+            
+            <div style="display:inline-flex; align-items:center; justify-content:center; width:60px; height:60px; border-radius:50%; background:#f8fafc; border:1px solid #e2e8f0; margin-bottom:16px; box-shadow:0 6px 14px rgba(0,0,0,0.06);">
+                <svg width="30" height="30" viewBox="0 0 48 48">
+                    <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                    <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                    <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                    <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                </svg>
+            </div>
+
+            <h3 style="margin:0 0 6px 0; font-size:21px; font-weight:900; color:#0f172a;">Sign in with Google</h3>
+            <p style="margin:0 0 20px 0; font-size:13.5px; color:#64748b; line-height:1.5;">Enter your Google Account (Gmail) to authenticate and create your Billora store:</p>
+
+            <div style="text-align:left; margin-bottom:18px;">
+                <label style="display:block; font-size:13px; font-weight:700; color:#334155; margin-bottom:6px;">Google Email Address</label>
+                <input type="email" id="modalGoogleEmail" placeholder="yourname@gmail.com" autofocus style="width:100%; padding:12px 14px; border:1.5px solid #d1d5db; border-radius:10px; font-size:14px; box-sizing:border-box;">
+                <div id="modalGoogleError" style="display:none; color:#dc2626; font-size:12px; margin-top:6px; font-weight:600;">Please enter a valid Gmail address (@gmail.com).</div>
+            </div>
+
+            <button type="button" onclick="connectGoogleEmail()" style="width:100%; padding:13px; background:#2563eb; color:white; border:none; border-radius:12px; font-size:14.5px; font-weight:800; cursor:pointer; box-shadow:0 4px 14px rgba(37,99,235,0.28); transition:background 0.2s;">
+                Continue with Google Account
+            </button>
+        </div>
+    </div>
 
 <script>
     let userEditedCode = false;

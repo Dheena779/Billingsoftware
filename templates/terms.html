@@ -3,40 +3,103 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Terms & Conditions - Cloud Billing Software</title>
+    <title>Terms &amp; Conditions - Billora Cloud Billing</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" type="image/jpeg" href="{{ url_for('static', filename='billora-logo.jpg') }}">
     <style>
-        .policy-container {
-            max-width: 860px;
-            margin: 40px auto 80px auto;
-            padding: 0 24px;
+        body {
+            background: #f8fafc;
+            margin: 0;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             color: #1e293b;
+        }
+        .policy-header {
+            padding: 16px 28px;
+            background: white;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+        }
+        .brand-link {
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #0f172a;
+            font-size: 20px;
+            font-weight: 900;
+            letter-spacing: -0.5px;
+        }
+        .brand-logo {
+            width: 36px;
+            height: 36px;
+            object-fit: contain;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(37,99,235,0.15);
+        }
+        .policy-container {
+            max-width: 880px;
+            margin: 40px auto 80px auto;
+            padding: 0 20px;
             line-height: 1.7;
         }
         .policy-card {
             background: white;
-            border-radius: 16px;
-            padding: 40px;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            border-radius: 20px;
+            padding: 42px 38px;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05), 0 8px 10px -6px rgba(0,0,0,0.02);
             border: 1px solid #e2e8f0;
         }
-        h1 { font-size: 28px; font-weight: 800; color: #0f172a; margin-bottom: 8px; }
-        h2 { font-size: 18px; font-weight: 700; color: #1e3a8a; margin-top: 28px; margin-bottom: 10px; }
-        p, li { font-size: 14px; color: #475569; }
-        .last-updated { font-size: 13px; color: #64748b; margin-bottom: 24px; }
+        h1 { font-size: 30px; font-weight: 900; color: #0f172a; margin: 0 0 8px 0; letter-spacing: -0.5px; }
+        .last-updated { font-size: 13px; color: #64748b; margin-bottom: 26px; font-weight: 500; }
+        h2 { font-size: 19px; font-weight: 800; color: #1e40af; margin-top: 32px; margin-bottom: 10px; }
+        p, li { font-size: 14.5px; color: #475569; }
+        ul { padding-left: 20px; }
+        .founder-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin-top: 18px;
+        }
+        .footer-nav {
+            text-align: center;
+            padding: 32px 20px;
+            color: #64748b;
+            font-size: 13px;
+            border-top: 1px solid #e2e8f0;
+            background: white;
+        }
+        .footer-nav a {
+            color: #475569;
+            text-decoration: none;
+            margin: 0 10px;
+            font-weight: 600;
+        }
+        .footer-nav a:hover {
+            color: #2563eb;
+        }
+        @media (max-width: 640px) {
+            .policy-card { padding: 26px 20px; }
+            h1 { font-size: 24px; }
+        }
     </style>
 </head>
-<body style="background: #f8fafc; margin: 0;">
+<body>
 
 {% if session.get('logged_in') %}
     {% include 'navbar.html' %}
 {% else %}
-<header style="padding: 16px 28px; background: white; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
-    <a href="/" style="text-decoration: none; font-size: 20px; font-weight: 800; color: #0f172a;">⚡ Cloud <span>Billing</span></a>
+<header class="policy-header">
+    <a href="/" class="brand-link">
+        <img src="{{ url_for('static', filename='billora-logo.jpg') }}" alt="Billora" class="brand-logo">
+        Billora
+    </a>
     <div>
         <a href="/login" style="color: #475569; text-decoration: none; font-weight: 600; margin-right: 16px; font-size: 14px;">Sign In</a>
-        <a href="/register" style="background: #2563eb; color: white; text-decoration: none; font-weight: 700; padding: 8px 16px; border-radius: 8px; font-size: 14px;">Start Free Trial</a>
+        <a href="/register" style="background: #2563eb; color: white; text-decoration: none; font-weight: 700; padding: 9px 18px; border-radius: 9px; font-size: 14px; box-shadow: 0 2px 6px rgba(37,99,235,0.25);">Start 7-Day Free Trial</a>
     </div>
 </header>
 {% endif %}
@@ -44,38 +107,73 @@
 <div class="policy-container">
     <div class="policy-card">
         <h1>Terms &amp; Conditions</h1>
-        <div class="last-updated">Last Updated: October 2026</div>
+        <div class="last-updated">Last Updated: October 2026 | Effective Date: October 2026</div>
 
-        <p>Welcome to <strong>Cloud Billing Software</strong>, owned and operated by <strong>Dheena</strong>, located in Vellore, Tamil Nadu, India. By registering an account or accessing our cloud billing platform and services, you agree to comply with and be bound by the following Terms &amp; Conditions.</p>
+        <p>
+            Welcome to <strong>Billora</strong>, an all-in-one cloud retail and billing management platform founded and operated by <strong>Dheena</strong>, headquartered in Vellore, Tamil Nadu, India. By creating an account or accessing our cloud software services, you agree to be bound by the following Terms &amp; Conditions.
+        </p>
 
-        <h2>1. Services Provided</h2>
-        <p>Cloud Billing Software is a multi-tenant cloud-based SaaS platform designed for retail shops, supermarkets, and businesses. Services include POS barcode billing, inventory management, staff attendance, sales reporting, and thermal invoice generation.</p>
-
-        <h2>2. Account Registration &amp; Store Code</h2>
-        <p>You agree to provide accurate and complete registration details. You are assigned a unique Store Code which identifies your store database. You are responsible for maintaining the confidentiality of your store login credentials and staff access.</p>
-
-        <h2>3. Subscription, Trial &amp; Payments</h2>
-        <p>We offer initial free trial access, test passes (₹5 for 30 minutes), and standard Pro subscription plans (Monthly ₹499, Annual ₹4,999). Payments are processed securely via authorized Indian payment gateways (Razorpay). Upon successful payment, a single-use unique license key is issued and activated on your account.</p>
-
-        <h2>4. Single-Use License Key Policy</h2>
-        <p>Each license key generated is strictly unique and tied to the redeeming store account. Sharing or attempting to use a redeemed license key across multiple store accounts is prohibited and will be rejected by the system.</p>
-
-        <h2>5. Data Privacy &amp; Security</h2>
-        <p>Each store's products, bills, customer data, and staff records are strictly isolated. We do not sell or disclose your store business data to third parties.</p>
-
-        <h2>6. Contact Details</h2>
-        <p>For any questions regarding these Terms, contact:</p>
+        <h2>1. Description of Cloud Services</h2>
+        <p>
+            Billora provides multi-tenant SaaS (Software as a Service) solutions for retailers, supermarkets, pharmacies, apparel stores, and eateries. Core platform features include:
+        </p>
         <ul>
-            <li><strong>Founder:</strong> Dheena</li>
-            <li><strong>Location:</strong> Vellore, Tamil Nadu, India</li>
-            <li><strong>Mobile:</strong> +91 7502399148</li>
-            <li><strong>Email:</strong> deenadayalan779@gmail.com</li>
+            <li>High-speed Point of Sale (POS) billing with barcode scanning support.</li>
+            <li>Thermal receipt printing (58mm / 80mm) and standard A4/A5 PDF invoices.</li>
+            <li>Batch-wise stock inventory tracking with First-In First-Out (FIFO) cost management.</li>
+            <li>Staff attendance, cashier clock-in/out logging, and role-based permissions.</li>
+            <li>Real-time revenue reports, profit calculation, and multi-device cloud synchronization.</li>
         </ul>
+
+        <h2>2. Account Registration &amp; Store Code Security</h2>
+        <ul>
+            <li>You agree to provide accurate and truthful details when registering your business account, including a valid Google Account / Gmail address.</li>
+            <li>Each store is assigned a unique <strong>Store Code</strong> (e.g. <code>STORE-101</code>) which partitions your store data from all other stores.</li>
+            <li>You are responsible for safeguarding your login credentials and ensuring cashiers only access authorized billing operations.</li>
+        </ul>
+
+        <h2>3. Subscription, 7-Day Free Trial &amp; License Keys</h2>
+        <ul>
+            <li><strong>7-Day Free Trial:</strong> All new stores receive 7 days of full-featured access at zero cost to evaluate the system.</li>
+            <li><strong>Pro Subscriptions:</strong> Store owners may upgrade to Pro plans (Monthly, Quarterly, Half-Yearly, or Annual) via secure online payment gateways (Razorpay).</li>
+            <li><strong>Single-Use License Keys:</strong> Each subscription generates a strictly unique, single-use license key. License keys are tied to the purchasing store and cannot be transferred, resold, or used simultaneously by other businesses.</li>
+            <li><strong>No Auto-Debit Traps:</strong> We do not secretly charge recurring auto-debits without explicit consent. When a subscription ends, your data remains safely stored in read-only mode until you renew.</li>
+        </ul>
+
+        <h2>4. Data Isolation &amp; Store Privacy</h2>
+        <p>
+            Each store’s inventory, product costs, supplier details, customer contact lists, and daily invoices are strictly isolated at the database level. Billora does not access, monetize, or sell your proprietary sales figures or customer database to any third party.
+        </p>
+
+        <h2>5. Fair Use &amp; Acceptable Usage</h2>
+        <p>
+            You agree not to use Billora for any unlawful billing activities, fraudulent tax invoicing, unauthorized system penetration testing, or reverse engineering of the software platform.
+        </p>
+
+        <h2>6. Service Availability &amp; Modifications</h2>
+        <p>
+            We strive for 99.9% cloud uptime. Periodic updates and performance enhancements may be deployed automatically to keep your store fast and secure without interrupting active billing terminals.
+        </p>
+
+        <h2>7. Governing Law &amp; Contact Information</h2>
+        <p>
+            These Terms shall be governed by and construed in accordance with the laws of India. For any questions or legal inquiries regarding these Terms:
+        </p>
+        <div class="founder-box">
+            <p style="margin: 0 0 6px 0;"><strong>Founder &amp; Owner:</strong> Dheena</p>
+            <p style="margin: 0 0 6px 0;"><strong>Official Email:</strong> <a href="mailto:deenadayalan779@gmail.com" style="color: #2563eb; font-weight: 700;">deenadayalan779@gmail.com</a></p>
+            <p style="margin: 0;"><strong>Headquarters:</strong> Vellore, Tamil Nadu, India</p>
+        </div>
     </div>
 </div>
 
-<footer style="text-align: center; padding: 24px; color: #64748b; font-size: 13px;">
-    &copy; 2026 Cloud Billing Software. Founder Dheena, Vellore. | <a href="/terms">Terms</a> | <a href="/privacy">Privacy</a> | <a href="/refund">Refund Policy</a>
+<footer class="footer-nav">
+    &copy; 2026 Billora. Founded by <strong>Dheena</strong>, Vellore. | 
+    <a href="/about">About Us</a> | 
+    <a href="/terms">Terms &amp; Conditions</a> | 
+    <a href="/privacy">Privacy Policy</a> | 
+    <a href="/refund">Refund Policy</a> | 
+    <a href="/contact">Contact Founder</a>
 </footer>
 
 </body>

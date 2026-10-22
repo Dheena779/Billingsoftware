@@ -1096,7 +1096,7 @@ def redeem_license_key(key_code, store_id):
         ).fetchone()
 
         if not key_row:
-            return False, "Invalid license key. Please check the code or contact founder Dheena (+91 7502399148)."
+            return False, "Invalid license key. Please check the code or contact founder Dheena (deenadayalan779@gmail.com)."
 
         if key_row["is_used"] == 1:
             if key_row["used_by_store_id"] == store_id:

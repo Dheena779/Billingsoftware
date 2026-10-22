@@ -80,10 +80,12 @@
 <body class="login-page">
 
 <div class="login-card">
-    <div class="logo" style="margin-bottom: 20px;">
-        <img src="{{ url_for('static', filename='billora-logo.jpg') }}" alt="Billora" style="width: 70px; height: auto; border-radius: 14px; margin-bottom: 8px;">
+    <div class="logo" style="margin-bottom: 22px; text-align: center;">
+        <div style="width: 66px; height: 66px; margin: 0 auto 12px auto; border-radius: 18px; background: white; box-shadow: 0 10px 24px -4px rgba(37,99,235,0.22), 0 0 0 1px rgba(37,99,235,0.08); display: flex; align-items: center; justify-content: center; padding: 6px;">
+            <img src="{{ url_for('static', filename='billora-logo.jpg') }}" alt="Billora" style="width: 100%; height: 100%; object-fit: contain; border-radius: 12px;">
+        </div>
         <h1 style="font-size: 24px; font-weight: 900; color: #111827; margin: 0 0 4px 0; letter-spacing: -0.5px;">Billora</h1>
-        <p style="color: #6b7280; font-size: 13px; margin: 0;">Cloud Retail Billing &amp; Inventory</p>
+        <p style="color: #6b7280; font-size: 13.5px; margin: 0;">Cloud Retail Billing &amp; Inventory</p>
     </div>
 
     <!-- TABS: Owner vs Staff -->
