@@ -308,47 +308,6 @@
         </div>
     </div>
 
-    <!-- TESTING PASS CARD: Rs 5 for 30 MINS -->
-    <div class="test-pass-box" style="margin-top: 10px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
-            <div>
-                <span style="background: #b45309; color: white; font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.5px;">⚡ Instant Testing Pass</span>
-                <h3 style="font-size: 20px; font-weight: 900; color: #78350f; margin: 6px 0 4px 0;">30-Minute Pro Access (₹5 Only)</h3>
-                <p style="margin: 0; color: #92400e; font-size: 13px; max-width: 540px;">
-                    Test live payments with ₹5 via <strong>Razorpay (UPI, GPay, PhonePe QR, Cards)</strong>. Automatically unlocks 30 minutes of Pro access.
-                </p>
-            </div>
-            <div>
-                <button 
-                    type="button" 
-                    id="rzpPay5Btn" 
-                    onclick="payWithRazorpay('test_30m')" 
-                    style="background: #2563eb; color: white; border: none; padding: 12px 22px; border-radius: 10px; font-size: 14px; font-weight: 800; cursor: pointer; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); transition: 0.2s;"
-                >
-                    💳 Pay ₹5 via Razorpay
-                </button>
-            </div>
-        </div>
-
-        <div id="testPayResult" style="display: none; margin-top: 20px; background: white; border: 2px solid #16a34a; border-radius: 12px; padding: 18px 20px;">
-            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
-                <div>
-                    <div style="font-size: 16px; font-weight: 800; color: #166534;" id="payResultTitle">🎉 Payment Successful!</div>
-                    <div style="font-size: 13px; color: #475569; margin-top: 2px;" id="payResultSub">
-                        Your store has been unlocked. Below is your strictly unique, single-use license key:
-                    </div>
-                </div>
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <div class="key-badge" id="generatedKeyBox">PRO-30M-XXXX-XXXX</div>
-                    <button type="button" onclick="copyUniqueKey()" style="background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 8px; padding: 8px 12px; font-weight: 700; font-size: 13px; cursor: pointer;">📋 Copy</button>
-                </div>
-            </div>
-            <div style="margin-top: 10px; font-size: 12px; color: #64748b;">
-                ℹ️ <em>Note: This key is tied to <strong>{{ store_name }}</strong> (Code: <code>{{ store_code }}</code>) and cannot be redeemed again by any other store.</em>
-            </div>
-        </div>
-    </div>
-
     <!-- COLLAPSIBLE OFFLINE ACTIVATION KEY REDEMPTION -->
     <details style="background: white; border: 1px solid #e2e8f0; border-radius: 14px; padding: 16px 20px; margin-bottom: 26px;">
         <summary style="cursor: pointer; font-size: 14px; font-weight: 700; color: #475569;">
@@ -379,14 +338,14 @@
         </div>
     </details>
 
-    <!-- FOUNDER & OWNER CONTACT BOX -->
+    <!-- FOUNDER CONTACT BOX (Confidential: Email Only) -->
     <div class="owner-contact-box" id="contactFounder">
         <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 10px;">
             <div>
                 <span style="background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 6px; text-transform: uppercase;">Direct Contact</span>
-                <h3 style="font-size: 20px; font-weight: 900; color: #1e3a8a; margin: 8px 0 4px 0;">To Upgrade or Renew Offline, Contact Founder Dheena</h3>
+                <h3 style="font-size: 20px; font-weight: 900; color: #1e3a8a; margin: 8px 0 4px 0;">Need Custom Plans or Assistance?</h3>
                 <p style="margin: 0; color: #475569; font-size: 13px;">
-                    Pay directly via GPay, PhonePe, Paytm, UPI, or bank transfer and founder Dheena will generate and send your unique Pro activation key instantly.
+                    Contact Founder Dheena directly via email for custom multi-store deployments, bulk licensing, or enterprise billing assistance.
                 </p>
             </div>
             <div style="font-size: 32px;">👤</div>
@@ -394,13 +353,8 @@
 
         <div class="contact-grid">
             <div class="contact-card">
-                <div class="title">Founder &amp; Owner</div>
+                <div class="title">Founder</div>
                 <div class="detail">Dheena</div>
-            </div>
-
-            <div class="contact-card">
-                <div class="title">Mobile Number</div>
-                <div class="detail">+91 7502399148</div>
             </div>
 
             <div class="contact-card">
@@ -409,20 +363,14 @@
             </div>
 
             <div class="contact-card">
-                <div class="title">Location / Address</div>
+                <div class="title">Location</div>
                 <div class="detail">Vellore, Tamil Nadu</div>
             </div>
         </div>
 
         <div class="btn-action-group">
-            <a href="tel:+917502399148" class="btn-call">
-                📞 Call Dheena (+91 7502399148)
-            </a>
-            <a href="https://wa.me/917502399148?text=Hello%20Dheena,%20I%20want%20to%20activate%20Pro%20subscription%20for%20my%20store:%20{{ store_name }}%20(Code:%20{{ store_code }})" target="_blank" class="btn-wa">
-                💬 Chat on WhatsApp
-            </a>
-            <a href="mailto:deenadayalan779@gmail.com?subject=Pro%20Activation%20Request%20for%20{{ store_name }}%20({{ store_code }})" class="btn-email">
-                ✉️ Send Email
+            <a href="mailto:deenadayalan779@gmail.com?subject=Billora%20Pro%20Subscription%20Inquiry%20for%20{{ store_name }}%20({{ store_code }})" class="btn-email" style="display: inline-flex; align-items: center; gap: 8px; background: #2563eb; color: white; padding: 12px 24px; border-radius: 10px; text-decoration: none; font-weight: 700; font-size: 14px;">
+                ✉️ Send Email to Founder
             </a>
         </div>
     </div>

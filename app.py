@@ -86,7 +86,9 @@ APP_VERSION = "2.5"
 def inject_branding():
 
     base_data = {
-        "store_name": "Billing",
+        "software_name": "Billora",
+        "brand_name": "Billora",
+        "store_name": "Store",
         "store_logo": "",
         "app_version": f"v{APP_VERSION}",
         "raw_version": APP_VERSION,
@@ -416,10 +418,22 @@ def register():
 
 
 # ==================================================
+# LANDING PAGE (Marketing & Product Showcase)
+# ==================================================
+
+@app.route("/")
+def index():
+    if session.get("logged_in"):
+        if session.get("role") == "staff":
+            return redirect("/billing")
+        return redirect("/dashboard")
+    return render_template("index.html")
+
+
+# ==================================================
 # LOGIN (Unified Owner & Staff)
 # ==================================================
 
-@app.route("/", methods=["GET", "POST"])
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "GET" and session.get("logged_in"):

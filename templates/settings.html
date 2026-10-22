@@ -858,20 +858,56 @@
     }
 
     function copyStoreCode() {
-        const code = $("displayStoreCode") ? $("displayStoreCode").textContent.trim() : "";
-        if (!code || code === "...") return;
-        navigator.clipboard.writeText(code).then(() => {
-            const btn = $("copyCodeBtn");
-            const original = btn.innerHTML;
-            btn.innerHTML = "✅ Copied!";
-            btn.style.background = "#16a34a";
-            setTimeout(() => {
-                btn.innerHTML = original;
-                btn.style.background = "#2563eb";
-            }, 2000);
-        }).catch(() => {
-            prompt("Copy Store Code:", code);
-        });
+        const codeEl = document.getElementById("displayStoreCode");
+        const code = codeEl ? codeEl.textContent.trim() : "";
+        if (!code || code === "...") {
+            alert("No store code available to copy.");
+            return;
+        }
+
+        const btn = document.getElementById("copyCodeBtn");
+        const original = btn ? btn.innerHTML : "📋 Copy Code";
+
+        function showSuccess() {
+            if (btn) {
+                btn.innerHTML = "✅ Copied!";
+                btn.style.background = "#16a34a";
+                setTimeout(() => {
+                    btn.innerHTML = original;
+                    btn.style.background = "#2563eb";
+                }, 2000);
+            }
+        }
+
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(code).then(showSuccess).catch(() => {
+                fallbackCopy(code, showSuccess);
+            });
+        } else {
+            fallbackCopy(code, showSuccess);
+        }
+    }
+
+    function fallbackCopy(text, onSuccess) {
+        try {
+            const ta = document.createElement("textarea");
+            ta.value = text;
+            ta.style.position = "fixed";
+            ta.style.left = "-9999px";
+            ta.style.top = "0";
+            document.body.appendChild(ta);
+            ta.focus();
+            ta.select();
+            const successful = document.execCommand("copy");
+            document.body.removeChild(ta);
+            if (successful && onSuccess) {
+                onSuccess();
+            } else {
+                prompt("Copy Store Code:", text);
+            }
+        } catch (err) {
+            prompt("Copy Store Code:", text);
+        }
     }
 
     async function load() {
