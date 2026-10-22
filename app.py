@@ -396,19 +396,26 @@ def register():
                 **form_data
             )
 
+        # Strictly require a valid Google Account / Gmail address
+        if not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", email_or_phone):
+            return render_template(
+                "register.html",
+                error="A valid Google Account / Gmail address is required to create a store account.",
+                **form_data
+            )
+
         is_google = session.get("google_verified", False) and session.get("google_email") == email_or_phone
-        is_email = "@" in email_or_phone
 
         try:
             res = register_new_store(
                 store_name, owner_name, email_or_phone, password,
                 city=city, state=state, address=address, business_type=business_category,
                 custom_store_code=store_code,
-                email_verified=1 if (is_google or not is_email) else 0
+                email_verified=1 if is_google else 0
             )
 
-            if is_google or not is_email:
-                # Direct login for Google accounts or phone registrations
+            if is_google:
+                # Direct login for accounts verified via Google OAuth
                 session.clear()
                 session["logged_in"] = True
                 session["user_id"] = res["user_id"]

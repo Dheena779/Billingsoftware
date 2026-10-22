@@ -10,6 +10,7 @@ Environment Variables (set on Render):
 """
 
 import os
+import json
 import secrets
 import smtplib
 from email.mime.text import MIMEText
@@ -17,8 +18,12 @@ from email.mime.multipart import MIMEMultipart
 from datetime import datetime, timedelta
 from functools import wraps
 
-from flask import Blueprint, redirect, request, session, url_for, render_template
+from flask import Blueprint, redirect, request, session, url_for, render_template, jsonify
 from itsdangerous import URLSafeTimedSerializer
+
+from paths import APP_DIR
+
+DATA_DIR = os.path.join(APP_DIR, "data")
 
 # ---------------------------------------------------------------------------
 # Blueprint
@@ -39,9 +44,23 @@ def _get_serializer():
 
 
 def get_google_config():
+    client_id = _get_env("GOOGLE_CLIENT_ID")
+    client_secret = _get_env("GOOGLE_CLIENT_SECRET")
+
+    if not client_id:
+        cfg_file = os.path.join(DATA_DIR, "google_auth.json")
+        if os.path.exists(cfg_file):
+            try:
+                with open(cfg_file, "r", encoding="utf-8") as f:
+                    cfg_data = json.load(f)
+                    client_id = cfg_data.get("client_id", "")
+                    client_secret = cfg_data.get("client_secret", "")
+            except Exception:
+                pass
+
     return {
-        "client_id": _get_env("GOOGLE_CLIENT_ID"),
-        "client_secret": _get_env("GOOGLE_CLIENT_SECRET"),
+        "client_id": client_id,
+        "client_secret": client_secret,
         "auth_uri": "https://accounts.google.com/o/oauth2/v2/auth",
         "token_uri": "https://oauth2.googleapis.com/token",
         "userinfo_uri": "https://www.googleapis.com/oauth2/v3/userinfo",
@@ -61,6 +80,17 @@ def send_verification_email(to_email, token, store_name="your store"):
     """Send a verification email with a unique token link."""
     sender = _get_env("MAIL_SENDER_EMAIL")
     password = _get_env("MAIL_SENDER_PASSWORD")
+
+    if not sender or not password:
+        smtp_file = os.path.join(DATA_DIR, "smtp.json")
+        if os.path.exists(smtp_file):
+            try:
+                with open(smtp_file, "r", encoding="utf-8") as f:
+                    smtp_data = json.load(f)
+                    sender = smtp_data.get("sender_email", "")
+                    password = smtp_data.get("sender_password", "")
+            except Exception:
+                pass
 
     if not sender or not password:
         # SMTP not configured – skip verification in development
@@ -148,22 +178,29 @@ def confirm_verification_token(token, max_age=86400):
 # Google OAuth routes
 # ---------------------------------------------------------------------------
 
+@auth_bp.route("/auth/google/status")
+def google_status():
+    cfg = get_google_config()
+    return jsonify({
+        "configured": bool(cfg["client_id"] and cfg["client_secret"]),
+        "client_id": cfg["client_id"] or ""
+    })
+
+
 @auth_bp.route("/auth/google")
 def google_login():
     """Redirect user to Google's consent screen."""
     cfg = get_google_config()
-    if not cfg["client_id"]:
-        # Google OAuth not configured - show friendly message
-        action = request.args.get("action", "login")
-        if action == "register":
-            return redirect("/register")
-        return redirect("/login")
-
     action = request.args.get("action", "login")
+
+    if not cfg["client_id"]:
+        # When not configured, redirect with google_prompt=1 so the page opens the Google modal
+        if action == "register":
+            return redirect("/register?google_prompt=1")
+        return redirect("/login?google_prompt=1")
+
     session["oauth_action"] = action
-
     callback = f"{_base_url()}/auth/google/callback"
-
     state = secrets.token_urlsafe(16)
     session["oauth_state"] = state
 

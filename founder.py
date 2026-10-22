@@ -348,3 +348,56 @@ def founder_api_activate_store():
             "time_left_str": sub.get("time_left_str")
         })
     return jsonify({"success": False, "error": msg}), 400
+
+
+# ==================================================
+# API: INTEGRATIONS (Google OAuth & SMTP)
+# ==================================================
+
+@founder_bp.route("/founder/api/integrations", methods=["GET", "POST"])
+@founder_required
+def founder_api_integrations():
+    google_file = os.path.join(DATA_DIR, "google_auth.json")
+    smtp_file = os.path.join(DATA_DIR, "smtp.json")
+
+    if request.method == "POST":
+        data = request.get_json(silent=True) or {}
+        # Save Google OAuth
+        g_id = data.get("google_client_id", "").strip()
+        g_sec = data.get("google_client_secret", "").strip()
+        if g_id:
+            with open(google_file, "w", encoding="utf-8") as f:
+                json.dump({"client_id": g_id, "client_secret": g_sec}, f, indent=2)
+
+        # Save SMTP
+        s_email = data.get("smtp_email", "").strip()
+        s_pw = data.get("smtp_password", "").strip()
+        if s_email:
+            with open(smtp_file, "w", encoding="utf-8") as f:
+                json.dump({"sender_email": s_email, "sender_password": s_pw}, f, indent=2)
+
+        return jsonify({"success": True, "message": "Integrations updated successfully!"})
+
+    # GET
+    g_data = {}
+    if os.path.exists(google_file):
+        try:
+            with open(google_file, "r", encoding="utf-8") as f:
+                g_data = json.load(f)
+        except Exception:
+            pass
+
+    s_data = {}
+    if os.path.exists(smtp_file):
+        try:
+            with open(smtp_file, "r", encoding="utf-8") as f:
+                s_data = json.load(f)
+        except Exception:
+            pass
+
+    return jsonify({
+        "google_client_id": os.environ.get("GOOGLE_CLIENT_ID") or g_data.get("client_id", ""),
+        "has_google_secret": bool(os.environ.get("GOOGLE_CLIENT_SECRET") or g_data.get("client_secret")),
+        "smtp_email": os.environ.get("MAIL_SENDER_EMAIL") or s_data.get("sender_email", ""),
+        "has_smtp_password": bool(os.environ.get("MAIL_SENDER_PASSWORD") or s_data.get("sender_password"))
+    })
