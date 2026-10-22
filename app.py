@@ -94,6 +94,7 @@ def inject_branding():
         "sub_active": True,
         "sub_time_left": "",
         "sub_code": "",
+        "business_category": session.get("business_category", ""),
     }
 
     try:
@@ -111,6 +112,8 @@ def inject_branding():
             base_data["sub_active"] = sub.get("is_active", True)
             base_data["sub_time_left"] = sub.get("time_left_str", "")
             base_data["sub_code"] = sub.get("store_code", "")
+            if not base_data["business_category"]:
+                base_data["business_category"] = sub.get("business_category", "")
         except Exception:
             pass
 
@@ -304,6 +307,7 @@ def register():
         store_name = request.form.get("store_name", "").strip()
         owner_name = request.form.get("owner_name", "").strip()
         email_or_phone = request.form.get("email_or_phone", "").strip()
+        store_code = request.form.get("store_code", "").strip().upper()
         city = request.form.get("city", "").strip()
         state = request.form.get("state", "").strip()
         address = request.form.get("address", "").strip()
@@ -315,6 +319,7 @@ def register():
             "store_name": store_name,
             "owner_name": owner_name,
             "email_or_phone": email_or_phone,
+            "store_code": store_code,
             "city": city,
             "state": state,
             "address": address,
@@ -327,6 +332,25 @@ def register():
                 error="Please fill in all required fields marked with *.",
                 **form_data
             )
+
+        # Validate custom store code if provided
+        if store_code:
+            import re
+            if not re.match(r"^[A-Z0-9\-]{3,20}$", store_code):
+                return render_template(
+                    "register.html",
+                    error="Store code must be 3-20 characters long and contain letters/numbers (e.g. STORE-101).",
+                    **form_data
+                )
+            conn = get_connection()
+            code_exists = conn.execute("SELECT id FROM stores WHERE UPPER(store_code) = ?", (store_code,)).fetchone()
+            conn.close()
+            if code_exists:
+                return render_template(
+                    "register.html",
+                    error="Store code already exists. Please choose another store code.",
+                    **form_data
+                )
 
         if len(password) < 4:
             return render_template(
@@ -360,7 +384,8 @@ def register():
         try:
             res = register_new_store(
                 store_name, owner_name, email_or_phone, password,
-                city=city, state=state, address=address, business_type=business_category
+                city=city, state=state, address=address, business_type=business_category,
+                custom_store_code=store_code
             )
             session.clear()
             session["logged_in"] = True
@@ -370,9 +395,16 @@ def register():
             session["store_name"] = res["store_name"]
             session["username"] = res["username"]
             session["owner_name"] = res["owner_name"]
+            session["business_category"] = res.get("business_category", business_category)
             session["role"] = "admin"
             session["last_active"] = int(time.time())
             return redirect("/dashboard")
+        except ValueError as ve:
+            return render_template(
+                "register.html",
+                error=str(ve),
+                **form_data
+            )
         except Exception as e:
             return render_template(
                 "register.html",
@@ -888,6 +920,7 @@ def get_store_license_info(store_id=None):
         "is_active": sub["is_active"],
         "days_left": sub.get("days_left", 0),
         "minutes_left": sub.get("minutes_left", 0),
+        "seconds_left": sub.get("seconds_left", 0),
         "time_left_str": sub.get("time_left_str", ""),
         "expires_at": sub.get("expires_at", ""),
         "store_code": sub.get("store_code", ""),
@@ -4284,15 +4317,27 @@ SUBSCRIPTION_PLANS = {
         "duration_minutes": 30
     },
     "monthly": {
-        "name": "Monthly Pro Plan",
+        "name": "Monthly Pro Plan (30 Days)",
         "amount_paise": 49900,   # ₹499.00
         "price_rupees": 499.0,
         "duration_minutes": 30 * 24 * 60  # 43200 minutes (30 days)
     },
+    "quarterly": {
+        "name": "3-Month Pro Plan (90 Days)",
+        "amount_paise": 129900,  # ₹1,299.00
+        "price_rupees": 1299.0,
+        "duration_minutes": 90 * 24 * 60  # 129600 minutes (90 days)
+    },
+    "half_yearly": {
+        "name": "6-Month Pro Plan (180 Days)",
+        "amount_paise": 279900,  # ₹2,799.00
+        "price_rupees": 2799.0,
+        "duration_minutes": 180 * 24 * 60  # 259200 minutes (180 days)
+    },
     "annual": {
-        "name": "Annual Pro Plan (1 Year)",
-        "amount_paise": 499900,  # ₹4,999.00
-        "price_rupees": 4999.0,
+        "name": "Annual Pro Plan (1 Year - Best Value)",
+        "amount_paise": 399900,  # ₹3,999.00
+        "price_rupees": 3999.0,
         "duration_minutes": 365 * 24 * 60 # 525600 minutes (365 days)
     }
 }

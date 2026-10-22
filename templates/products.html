@@ -327,7 +327,7 @@
                     <input
                         type="text"
                         id="productName"
-                        placeholder="Example: Paneer"
+                        placeholder="{% if 'pharmacy' in (business_category|default('')|lower) or 'medical' in (business_category|default('')|lower) %}Example: Paracetamol 500mg (Tablet){% elif 'clothing' in (business_category|default('')|lower) or 'apparel' in (business_category|default('')|lower) %}Example: Cotton T-Shirt (Size L){% elif 'electronics' in (business_category|default('')|lower) or 'mobile' in (business_category|default('')|lower) %}Example: Fast Charging USB-C Cable{% elif 'bakery' in (business_category|default('')|lower) or 'cafe' in (business_category|default('')|lower) or 'restaurant' in (business_category|default('')|lower) %}Example: Chicken Biryani / Cake{% elif 'hardware' in (business_category|default('')|lower) %}Example: LED Bulb 9W{% else %}Example: Paneer (200g){% endif %}"
                         required
                         autocomplete="off"
                     >
@@ -349,7 +349,7 @@
                     <input
                         type="text"
                         id="billingName"
-                        placeholder="Example: Fresh Paneer"
+                        placeholder="{% if 'pharmacy' in (business_category|default('')|lower) or 'medical' in (business_category|default('')|lower) %}Example: Paracetamol 500mg Strip{% elif 'clothing' in (business_category|default('')|lower) or 'apparel' in (business_category|default('')|lower) %}Example: Men's Cotton T-Shirt{% elif 'electronics' in (business_category|default('')|lower) or 'mobile' in (business_category|default('')|lower) %}Example: Type-C Fast Cable 1m{% elif 'bakery' in (business_category|default('')|lower) or 'cafe' in (business_category|default('')|lower) or 'restaurant' in (business_category|default('')|lower) %}Example: Special Chicken Biryani{% elif 'hardware' in (business_category|default('')|lower) %}Example: 9W Cool Day LED Bulb{% else %}Example: Fresh Paneer{% endif %}"
                         required
                         autocomplete="off"
                     >
@@ -1723,10 +1723,45 @@
 
 
     /* =========================================
+       DYNAMIC CATEGORY PLACEHOLDERS
+    ========================================= */
+
+    function applyCategoryPlaceholders() {
+        const cat = "{{ business_category or '' }}".toLowerCase();
+        const nameEl = document.getElementById("productName");
+        const billEl = document.getElementById("billingName");
+        if (!nameEl || !billEl) return;
+
+        if (cat.includes("pharmacy") || cat.includes("medical")) {
+            nameEl.placeholder = "Example: Paracetamol 500mg (Tablet)";
+            billEl.placeholder = "Example: Paracetamol 500mg Strip";
+        } else if (cat.includes("grocery") || cat.includes("supermarket")) {
+            nameEl.placeholder = "Example: Paneer (200g)";
+            billEl.placeholder = "Example: Fresh Paneer";
+        } else if (cat.includes("clothing") || cat.includes("apparel") || cat.includes("textile")) {
+            nameEl.placeholder = "Example: Cotton T-Shirt (Size L)";
+            billEl.placeholder = "Example: Men's Cotton T-Shirt";
+        } else if (cat.includes("electronics") || cat.includes("mobile")) {
+            nameEl.placeholder = "Example: Fast Charging USB-C Cable";
+            billEl.placeholder = "Example: Type-C Fast Cable 1m";
+        } else if (cat.includes("bakery") || cat.includes("cafe") || cat.includes("restaurant")) {
+            nameEl.placeholder = "Example: Chicken Biryani / Cake";
+            billEl.placeholder = "Example: Special Chicken Biryani";
+        } else if (cat.includes("hardware") || cat.includes("sanitary") || cat.includes("electrical")) {
+            nameEl.placeholder = "Example: LED Bulb 9W";
+            billEl.placeholder = "Example: 9W Cool Day LED Bulb";
+        } else {
+            nameEl.placeholder = "Example: Product Name";
+            billEl.placeholder = "Example: Billing Display Name";
+        }
+    }
+
+    /* =========================================
        OPEN ADD PRODUCT
     ========================================= */
 
     function openAddProduct() {
+        applyCategoryPlaceholders();
 
         document.getElementById("productModal")
             .classList.add("active");

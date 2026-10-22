@@ -49,6 +49,7 @@ def initialize_database():
             owner_name TEXT NOT NULL,
             owner_email TEXT,
             owner_phone TEXT,
+            business_category TEXT DEFAULT '',
             plan_status TEXT DEFAULT 'trial',
             trial_ends_at TIMESTAMP,
             subscription_ends_at TIMESTAMP,
@@ -58,6 +59,12 @@ def initialize_database():
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_stores_code ON stores(store_code)")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_stores_email ON stores(owner_email)")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_stores_phone ON stores(owner_phone)")
+
+    # Migration for business_category
+    cursor.execute("PRAGMA table_info(stores)")
+    store_cols = [c["name"] for c in cursor.fetchall()]
+    if "business_category" not in store_cols:
+        cursor.execute("ALTER TABLE stores ADD COLUMN business_category TEXT DEFAULT ''")
 
     # =========================
     # LICENSE KEYS (Single-Use, Store-Unique)
@@ -749,14 +756,14 @@ def initialize_database():
     conn.close()
 
 
-def register_new_store(store_name, owner_name, email_or_phone, password, city="", state="", address="", business_type=""):
+def register_new_store(store_name, owner_name, email_or_phone, password, city="", state="", address="", business_type="", custom_store_code=None):
     """
-    Registers a new store with a 14-day free trial.
+    Registers a new store with a 5-minute free trial.
     Creates:
       1. Store in `stores` table
       2. Admin user in `users` table
       3. Business profile in `business` table
-    Returns dict with store_id, store_code, user_id, username.
+    Returns dict with store_id, store_code, user_id, username, business_category.
     """
     conn = get_connection()
     try:
@@ -767,24 +774,32 @@ def register_new_store(store_name, owner_name, email_or_phone, password, city=""
         city = (city or "").strip()
         state = (state or "").strip()
         address = (address or "").strip()
+        business_type = (business_type or "").strip()
 
         is_email = "@" in email_or_phone
         email = email_or_phone if is_email else ""
         phone = "" if is_email else email_or_phone
 
-        # Generate unique store code from store name
-        clean_code = re.sub(r"[^A-Za-z0-9]", "", store_name).upper()[:6]
-        if len(clean_code) < 3:
-            clean_code = "STORE"
+        # Store Code Logic: custom if provided, otherwise Character-Number combination (e.g. MALAR-101)
+        if custom_store_code and custom_store_code.strip():
+            candidate = re.sub(r"[^A-Za-z0-9\-]", "", custom_store_code.strip()).upper()
+            row = conn.execute("SELECT id FROM stores WHERE UPPER(store_code) = ?", (candidate,)).fetchone()
+            if row:
+                raise ValueError("Store code already exists. Please choose another store code.")
+            store_code = candidate
+        else:
+            # Generate unique Character-Number code (e.g. MALAR-101)
+            clean_code = re.sub(r"[^A-Za-z0-9]", "", store_name).upper()[:6]
+            if len(clean_code) < 3:
+                clean_code = "STORE"
 
-        attempt = 0
-        store_code = clean_code
-        while True:
-            row = conn.execute("SELECT id FROM stores WHERE store_code = ?", (store_code,)).fetchone()
-            if not row:
-                break
-            attempt += 1
-            store_code = f"{clean_code}{attempt}"
+            attempt = 101
+            while True:
+                store_code = f"{clean_code}-{attempt}"
+                row = conn.execute("SELECT id FROM stores WHERE store_code = ?", (store_code,)).fetchone()
+                if not row:
+                    break
+                attempt += 1
 
         # 5-minute testing trial (as requested for instant verification)
         trial_ends = (datetime.now() + timedelta(minutes=5)).strftime("%Y-%m-%d %H:%M:%S")
@@ -792,10 +807,10 @@ def register_new_store(store_name, owner_name, email_or_phone, password, city=""
         cur = conn.execute("""
             INSERT INTO stores (
                 store_code, store_name, owner_name, owner_email, owner_phone,
-                plan_status, trial_ends_at
+                business_category, plan_status, trial_ends_at
             )
-            VALUES (?, ?, ?, ?, ?, 'trial', ?)
-        """, (store_code, store_name, owner_name, email, phone, trial_ends))
+            VALUES (?, ?, ?, ?, ?, ?, 'trial', ?)
+        """, (store_code, store_name, owner_name, email, phone, business_type, trial_ends))
         store_id = cur.lastrowid
 
         # Create Admin user
@@ -822,6 +837,7 @@ def register_new_store(store_name, owner_name, email_or_phone, password, city=""
             "store_id": store_id,
             "store_code": store_code,
             "store_name": store_name,
+            "business_category": business_type,
             "user_id": user_id,
             "username": username,
             "owner_name": owner_name
@@ -858,13 +874,14 @@ def get_store_subscription(store_id):
             "time_left_str": "Expired",
             "expires_at": None,
             "store_code": "",
-            "store_name": ""
+            "store_name": "",
+            "business_category": ""
         }
 
     conn = get_connection()
     try:
         store = conn.execute(
-            "SELECT id, store_code, store_name, plan_status, trial_ends_at, subscription_ends_at FROM stores WHERE id = ?",
+            "SELECT id, store_code, store_name, plan_status, trial_ends_at, subscription_ends_at, business_category FROM stores WHERE id = ?",
             (store_id,)
         ).fetchone()
 
@@ -878,8 +895,11 @@ def get_store_subscription(store_id):
                 "time_left_str": "Expired",
                 "expires_at": None,
                 "store_code": "",
-                "store_name": ""
+                "store_name": "",
+                "business_category": ""
             }
+
+        b_cat = (store["business_category"] or "") if "business_category" in store.keys() else ""
 
         now = datetime.now()
         plan_status = store["plan_status"] or "trial"
@@ -931,7 +951,8 @@ def get_store_subscription(store_id):
                         "time_left_str": "Expired",
                         "expires_at": sub_ends.strftime("%d %b %Y, %I:%M %p"),
                         "store_code": store["store_code"],
-                        "store_name": store["store_name"]
+                        "store_name": store["store_name"],
+                        "business_category": b_cat
                     }
                 else:
                     return {
@@ -943,7 +964,8 @@ def get_store_subscription(store_id):
                         "time_left_str": time_str,
                         "expires_at": sub_ends.strftime("%d %b %Y, %I:%M %p"),
                         "store_code": store["store_code"],
-                        "store_name": store["store_name"]
+                        "store_name": store["store_name"],
+                        "business_category": b_cat
                     }
             else:
                 return {
@@ -955,7 +977,8 @@ def get_store_subscription(store_id):
                     "time_left_str": "Lifetime",
                     "expires_at": "Lifetime Pro",
                     "store_code": store["store_code"],
-                    "store_name": store["store_name"]
+                    "store_name": store["store_name"],
+                    "business_category": b_cat
                 }
 
         # Case 2: Free Trial (5 minutes)
@@ -974,7 +997,8 @@ def get_store_subscription(store_id):
                         "time_left_str": "Expired",
                         "expires_at": trial_ends.strftime("%d %b %Y, %I:%M %p"),
                         "store_code": store["store_code"],
-                        "store_name": store["store_name"]
+                        "store_name": store["store_name"],
+                        "business_category": b_cat
                     }
                 else:
                     return {
@@ -986,7 +1010,8 @@ def get_store_subscription(store_id):
                         "time_left_str": time_str,
                         "expires_at": trial_ends.strftime("%d %b %Y, %I:%M %p"),
                         "store_code": store["store_code"],
-                        "store_name": store["store_name"]
+                        "store_name": store["store_name"],
+                        "business_category": b_cat
                     }
             else:
                 return {
@@ -998,7 +1023,8 @@ def get_store_subscription(store_id):
                     "time_left_str": "5m 00s",
                     "expires_at": "In 5 Minutes",
                     "store_code": store["store_code"],
-                    "store_name": store["store_name"]
+                    "store_name": store["store_name"],
+                    "business_category": b_cat
                 }
 
         # Case 3: Already expired
@@ -1012,7 +1038,8 @@ def get_store_subscription(store_id):
             "time_left_str": "Expired",
             "expires_at": exp_target.strftime("%d %b %Y, %I:%M %p"),
             "store_code": store["store_code"],
-            "store_name": store["store_name"]
+            "store_name": store["store_name"],
+            "business_category": b_cat
         }
     finally:
         conn.close()

@@ -216,32 +216,116 @@
     </div>
     {% endif %}
 
+    <!-- SUBSCRIPTION PLANS -->
+    <div style="text-align: center; margin-bottom: 24px;">
+        <span style="background: #e0e7ff; color: #4338ca; font-size: 11px; font-weight: 800; padding: 4px 12px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.5px;">Choose Your Plan</span>
+        <h2 style="font-size: 26px; font-weight: 900; color: #0f172a; margin: 8px 0 6px 0;">Upgrade to Cloud Pro</h2>
+        <p style="color: #64748b; font-size: 14px; margin: 0;">Unlock unlimited billing, cloud inventory sync, thermal printing, and multi-device access.</p>
+    </div>
+
+    <div class="plan-cards-grid">
+        <!-- MONTHLY (Rs 499) -->
+        <div class="plan-card">
+            <h4 style="font-size: 18px; font-weight: 800; margin: 0 0 6px 0; color: #0f172a;">Monthly Pro</h4>
+            <div style="font-size: 30px; font-weight: 900; color: #2563eb; margin: 10px 0 4px 0;">₹499 <span style="font-size: 13px; color: #64748b; font-weight: 600;">/ 30 Days</span></div>
+            <div style="font-size: 12px; color: #64748b; margin-bottom: 14px;">₹16.6 / day</div>
+            <ul style="text-align: left; font-size: 13px; color: #475569; padding-left: 18px; line-height: 1.8; margin-bottom: 16px;">
+                <li>Unlimited Bills &amp; Invoices</li>
+                <li>Full Product Inventory</li>
+                <li>Staff &amp; Cashier Attendance</li>
+                <li>Standard WhatsApp Support</li>
+            </ul>
+            <button 
+                type="button" 
+                onclick="payWithRazorpay('monthly')" 
+                style="display: block; width: 100%; background: #2563eb; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: 800; font-size: 14px; cursor: pointer; transition: 0.2s;"
+            >
+                💳 Pay ₹499 via Razorpay
+            </button>
+        </div>
+
+        <!-- 3 MONTHS (Rs 1299) -->
+        <div class="plan-card">
+            <span style="position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: #3b82f6; color: white; font-size: 10px; font-weight: 800; padding: 3px 10px; border-radius: 20px; text-transform: uppercase;">Save ₹198</span>
+            <h4 style="font-size: 18px; font-weight: 800; margin: 6px 0 6px 0; color: #0f172a;">3 Months Pro</h4>
+            <div style="font-size: 30px; font-weight: 900; color: #2563eb; margin: 10px 0 4px 0;">₹1,299 <span style="font-size: 13px; color: #64748b; font-weight: 600;">/ 90 Days</span></div>
+            <div style="font-size: 12px; color: #16a34a; font-weight: 700; margin-bottom: 14px;">₹433 / month</div>
+            <ul style="text-align: left; font-size: 13px; color: #475569; padding-left: 18px; line-height: 1.8; margin-bottom: 16px;">
+                <li>All Monthly Pro features</li>
+                <li>Quarterly Sales &amp; GST Reports</li>
+                <li>Stock Movement Tracking</li>
+                <li>Priority Feature Updates</li>
+            </ul>
+            <button 
+                type="button" 
+                onclick="payWithRazorpay('quarterly')" 
+                style="display: block; width: 100%; background: #2563eb; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: 800; font-size: 14px; cursor: pointer; transition: 0.2s;"
+            >
+                💳 Pay ₹1,299 via Razorpay
+            </button>
+        </div>
+
+        <!-- 6 MONTHS (Rs 2799) -->
+        <div class="plan-card">
+            <span style="position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: #059669; color: white; font-size: 10px; font-weight: 800; padding: 3px 10px; border-radius: 20px; text-transform: uppercase;">Save ₹195</span>
+            <h4 style="font-size: 18px; font-weight: 800; margin: 6px 0 6px 0; color: #0f172a;">6 Months Pro</h4>
+            <div style="font-size: 30px; font-weight: 900; color: #059669; margin: 10px 0 4px 0;">₹2,799 <span style="font-size: 13px; color: #64748b; font-weight: 600;">/ 180 Days</span></div>
+            <div style="font-size: 12px; color: #16a34a; font-weight: 700; margin-bottom: 14px;">₹466 / month</div>
+            <ul style="text-align: left; font-size: 13px; color: #475569; padding-left: 18px; line-height: 1.8; margin-bottom: 16px;">
+                <li>All Pro features included</li>
+                <li>6 Months Cloud Backup</li>
+                <li>Staff Payroll &amp; Salary Advances</li>
+                <li>Dedicated WhatsApp Support</li>
+            </ul>
+            <button 
+                type="button" 
+                onclick="payWithRazorpay('half_yearly')" 
+                style="display: block; width: 100%; background: #059669; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: 800; font-size: 14px; cursor: pointer; transition: 0.2s;"
+            >
+                ⭐ Pay ₹2,799 via Razorpay
+            </button>
+        </div>
+
+        <!-- ANNUAL (Rs 3999) - FEATURED -->
+        <div class="plan-card featured">
+            <span style="position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: #dc2626; color: white; font-size: 10px; font-weight: 900; padding: 3px 12px; border-radius: 20px; text-transform: uppercase;">Best Value (Save ₹1,989)</span>
+            <h4 style="font-size: 18px; font-weight: 800; margin: 6px 0 6px 0; color: #0f172a;">Annual Pro (1 Year)</h4>
+            <div style="font-size: 32px; font-weight: 900; color: #16a34a; margin: 10px 0 4px 0;">₹3,999 <span style="font-size: 13px; color: #64748b; font-weight: 600;">/ 365 Days</span></div>
+            <div style="font-size: 12px; color: #16a34a; font-weight: 800; margin-bottom: 14px;">Only ₹333 / month</div>
+            <ul style="text-align: left; font-size: 13px; color: #475569; padding-left: 18px; line-height: 1.8; margin-bottom: 16px;">
+                <li>Full 365 Days Uninterrupted Pro</li>
+                <li>Custom Thermal Invoice Branding</li>
+                <li>Full Multi-Device Access</li>
+                <li>Direct Phone &amp; WhatsApp Founder Support</li>
+            </ul>
+            <button 
+                type="button" 
+                onclick="payWithRazorpay('annual')" 
+                style="display: block; width: 100%; background: #16a34a; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: 800; font-size: 14px; cursor: pointer; transition: 0.2s;"
+            >
+                🔥 Pay ₹3,999 via Razorpay
+            </button>
+        </div>
+    </div>
+
     <!-- TESTING PASS CARD: Rs 5 for 30 MINS -->
-    <div class="test-pass-box">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 14px;">
+    <div class="test-pass-box" style="margin-top: 10px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
             <div>
                 <span style="background: #b45309; color: white; font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.5px;">⚡ Instant Testing Pass</span>
-                <h3 style="font-size: 22px; font-weight: 900; color: #78350f; margin: 8px 0 4px 0;">30-Minute Pro Access (₹5 Only)</h3>
-                <p style="margin: 0; color: #92400e; font-size: 14px; max-width: 540px;">
-                    Pay ₹5 via <strong>Razorpay (UPI, GPay, PhonePe QR, Cards)</strong>. Automatically generates your <strong>strictly unique single-use license key</strong> and unlocks 30 minutes of Pro access.
+                <h3 style="font-size: 20px; font-weight: 900; color: #78350f; margin: 6px 0 4px 0;">30-Minute Pro Access (₹5 Only)</h3>
+                <p style="margin: 0; color: #92400e; font-size: 13px; max-width: 540px;">
+                    Test live payments with ₹5 via <strong>Razorpay (UPI, GPay, PhonePe QR, Cards)</strong>. Automatically unlocks 30 minutes of Pro access.
                 </p>
             </div>
-            <div style="display: flex; flex-direction: column; gap: 8px;">
+            <div>
                 <button 
                     type="button" 
                     id="rzpPay5Btn" 
                     onclick="payWithRazorpay('test_30m')" 
-                    style="background: #2563eb; color: white; border: none; padding: 13px 22px; border-radius: 10px; font-size: 14px; font-weight: 800; cursor: pointer; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); transition: 0.2s;"
+                    style="background: #2563eb; color: white; border: none; padding: 12px 22px; border-radius: 10px; font-size: 14px; font-weight: 800; cursor: pointer; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); transition: 0.2s;"
                 >
-                    💳 Pay ₹5 via Razorpay (UPI / Cards)
-                </button>
-                <button 
-                    type="button" 
-                    id="payTestBtn" 
-                    onclick="payTestSubscription()" 
-                    style="background: #fff; color: #78350f; border: 1.5px solid #d97706; padding: 8px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer;"
-                >
-                    ⚡ Instant Simulate ₹5 (No Gateway)
+                    💳 Pay ₹5 via Razorpay
                 </button>
             </div>
         </div>
@@ -265,44 +349,47 @@
         </div>
     </div>
 
-    <!-- ENTER ACTIVATION KEY -->
-    <div class="activation-card">
-        <h3 style="font-size: 18px; font-weight: 800; color: #0f172a; margin: 0 0 6px 0;">🔑 Have a License / Activation Key?</h3>
-        <p style="margin: 0 0 16px 0; font-size: 13px; color: #64748b;">
-            If you received a unique single-use activation key from founder Dheena, enter it below to unlock your Pro subscription:
-        </p>
-
-        <form id="activateForm" onsubmit="submitActivationKey(event)" style="display: flex; gap: 10px; flex-wrap: wrap;">
-            <input 
-                type="text" 
-                id="activationKeyInput" 
-                placeholder="e.g. PRO-30M-XXXX-XXXX" 
-                required 
-                style="flex: 1; min-width: 260px; padding: 12px 16px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-family: monospace; font-size: 15px; font-weight: 700; text-transform: uppercase;"
-            >
-            <button 
-                type="submit" 
-                id="activateBtn" 
-                class="primary-button" 
-                style="padding: 12px 24px; font-size: 14px; font-weight: 800; border-radius: 8px; cursor: pointer; background: #2563eb; color: white; border: none;"
-            >
-                🚀 Apply Key &amp; Unlock Pro
-            </button>
-        </form>
-        <div id="activateMsg" style="margin-top: 14px; font-size: 14px; font-weight: 700; display: none;"></div>
-    </div>
+    <!-- COLLAPSIBLE OFFLINE ACTIVATION KEY REDEMPTION -->
+    <details style="background: white; border: 1px solid #e2e8f0; border-radius: 14px; padding: 16px 20px; margin-bottom: 26px;">
+        <summary style="cursor: pointer; font-size: 14px; font-weight: 700; color: #475569;">
+            🔑 Have an offline license activation key? Click to enter &amp; redeem
+        </summary>
+        <div style="margin-top: 16px; border-top: 1px solid #f1f5f9; padding-top: 14px;">
+            <p style="margin: 0 0 12px 0; font-size: 13px; color: #64748b;">
+                If you received a single-use license key directly from Founder Dheena, enter it below:
+            </p>
+            <form id="activateForm" onsubmit="submitActivationKey(event)" style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <input 
+                    type="text" 
+                    id="activationKeyInput" 
+                    placeholder="e.g. PRO-30M-XXXX-XXXX" 
+                    required 
+                    style="flex: 1; min-width: 240px; padding: 11px 14px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-family: monospace; font-size: 14px; font-weight: 700; text-transform: uppercase;"
+                >
+                <button 
+                    type="submit" 
+                    id="activateBtn" 
+                    class="primary-button" 
+                    style="padding: 11px 20px; font-size: 13px; font-weight: 800; border-radius: 8px; cursor: pointer; background: #2563eb; color: white; border: none;"
+                >
+                    Apply Key
+                </button>
+            </form>
+            <div id="activateMsg" style="margin-top: 12px; font-size: 13px; font-weight: 700; display: none;"></div>
+        </div>
+    </details>
 
     <!-- FOUNDER & OWNER CONTACT BOX -->
     <div class="owner-contact-box" id="contactFounder">
         <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 10px;">
             <div>
                 <span style="background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 6px; text-transform: uppercase;">Direct Contact</span>
-                <h3 style="font-size: 22px; font-weight: 900; color: #1e3a8a; margin: 8px 0 4px 0;">To Upgrade or Renew, Contact the Founder</h3>
-                <p style="margin: 0; color: #475569; font-size: 14px;">
+                <h3 style="font-size: 20px; font-weight: 900; color: #1e3a8a; margin: 8px 0 4px 0;">To Upgrade or Renew Offline, Contact Founder Dheena</h3>
+                <p style="margin: 0; color: #475569; font-size: 13px;">
                     Pay directly via GPay, PhonePe, Paytm, UPI, or bank transfer and founder Dheena will generate and send your unique Pro activation key instantly.
                 </p>
             </div>
-            <div style="font-size: 36px;">👤</div>
+            <div style="font-size: 32px;">👤</div>
         </div>
 
         <div class="contact-grid">
@@ -336,55 +423,6 @@
             </a>
             <a href="mailto:deenadayalan779@gmail.com?subject=Pro%20Activation%20Request%20for%20{{ store_name }}%20({{ store_code }})" class="btn-email">
                 ✉️ Send Email
-            </a>
-        </div>
-    </div>
-
-    <!-- STANDARD PRO PLANS -->
-    <h3 style="font-size: 18px; font-weight: 800; color: #0f172a; margin: 0 0 16px 0; text-align: center;">Standard Pro Plans</h3>
-    <div class="plan-cards-grid">
-        <div class="plan-card">
-            <h4 style="font-size: 18px; font-weight: 800; margin: 0 0 6px 0;">Monthly Pro</h4>
-            <div style="font-size: 28px; font-weight: 900; color: #2563eb; margin-bottom: 12px;">₹499 <span style="font-size: 14px; color: #64748b; font-weight: 500;">/ month</span></div>
-            <ul style="text-align: left; font-size: 13px; color: #475569; padding-left: 18px; line-height: 1.8;">
-                <li>Unlimited Bills &amp; Invoices</li>
-                <li>Unlimited Products &amp; Batches</li>
-                <li>Cashier &amp; Staff Attendance</li>
-                <li>Cloud Multi-Device Access</li>
-                <li>Dedicated WhatsApp Support</li>
-            </ul>
-            <button 
-                type="button" 
-                onclick="payWithRazorpay('monthly')" 
-                style="display: block; width: 100%; background: #2563eb; color: white; border: none; padding: 11px; border-radius: 8px; font-weight: 800; font-size: 13px; margin-top: 16px; cursor: pointer;"
-            >
-                💳 Pay ₹499 via Razorpay
-            </button>
-            <a href="https://wa.me/917502399148?text=Hello%20Dheena,%20I%20want%20the%20Monthly%20Pro%20Plan%20(Rs.499)%20for%20my%20store:%20{{ store_name }}%20(Code:%20{{ store_code }})" target="_blank" style="display: block; background: #f1f5f9; color: #0f172a; padding: 9px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 12px; margin-top: 8px;">
-                Chat on WhatsApp
-            </a>
-        </div>
-
-        <div class="plan-card featured">
-            <span style="position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: #2563eb; color: white; font-size: 11px; font-weight: 800; padding: 3px 12px; border-radius: 20px; text-transform: uppercase;">Best Value (Save ₹989)</span>
-            <h4 style="font-size: 18px; font-weight: 800; margin: 6px 0 6px 0;">Annual Pro (1 Year)</h4>
-            <div style="font-size: 28px; font-weight: 900; color: #16a34a; margin-bottom: 12px;">₹4,999 <span style="font-size: 14px; color: #64748b; font-weight: 500;">/ year</span></div>
-            <ul style="text-align: left; font-size: 13px; color: #475569; padding-left: 18px; line-height: 1.8;">
-                <li>All Monthly Pro features included</li>
-                <li>2 Months Free Subscription</li>
-                <li>Custom Thermal Invoice Branding</li>
-                <li>Priority Feature Requests</li>
-                <li>Direct Phone Call Founder Support</li>
-            </ul>
-            <button 
-                type="button" 
-                onclick="payWithRazorpay('annual')" 
-                style="display: block; width: 100%; background: #16a34a; color: white; border: none; padding: 11px; border-radius: 8px; font-weight: 800; font-size: 13px; margin-top: 16px; cursor: pointer;"
-            >
-                ⭐ Pay ₹4,999 via Razorpay
-            </button>
-            <a href="https://wa.me/917502399148?text=Hello%20Dheena,%20I%20want%20the%20Annual%20Pro%20Plan%20(Rs.4999)%20for%20my%20store:%20{{ store_name }}%20(Code:%20{{ store_code }})" target="_blank" style="display: block; background: #eff6ff; color: #1e40af; padding: 9px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 12px; margin-top: 8px;">
-                Chat on WhatsApp
             </a>
         </div>
     </div>
@@ -495,37 +533,6 @@
             rzp.open();
         } catch (err) {
             alert("Payment error: " + err.message);
-        }
-    }
-
-    // Direct Simulate Test Payment (Fallback)
-    async function payTestSubscription() {
-        const btn = document.getElementById("payTestBtn");
-        const resBox = document.getElementById("testPayResult");
-        const keyDisplay = document.getElementById("generatedKeyBox");
-
-        btn.disabled = true;
-        btn.innerText = "⏳ Processing...";
-
-        try {
-            const res = await fetch("/api/subscription/pay-test", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" }
-            });
-            const data = await res.json();
-            if (res.ok && data.success) {
-                lastGeneratedKey = data.key_code;
-                keyDisplay.innerText = data.key_code;
-                resBox.style.display = "block";
-                btn.innerText = "✅ Unlocked 30 Mins!";
-                setTimeout(() => window.location.reload(), 2000);
-            } else {
-                throw new Error(data.error || "Payment failed");
-            }
-        } catch (err) {
-            alert("Payment error: " + err.message);
-            btn.disabled = false;
-            btn.innerText = "⚡ Instant Simulate ₹5";
         }
     }
 

@@ -80,7 +80,18 @@
     <form method="POST" action="/register">
         <div class="input-group">
             <label for="store_name">Store / Business Name *</label>
-            <input type="text" id="store_name" name="store_name" placeholder="e.g. FreshMart Grocery" value="{{ store_name or '' }}" required autofocus>
+            <input type="text" id="store_name" name="store_name" placeholder="e.g. FreshMart Grocery" value="{{ store_name or '' }}" required autofocus oninput="suggestStoreCode(this.value)">
+        </div>
+
+        <div class="input-group">
+            <label for="store_code">
+                Custom Store Code * 
+                <small style="font-weight:400; color:#6b7280;">(Letters - Numbers, e.g. FRESH-101)</small>
+            </label>
+            <input type="text" id="store_code" name="store_code" placeholder="e.g. JOHN-101" value="{{ store_code or '' }}" style="text-transform:uppercase; font-family:monospace; font-weight:700; letter-spacing:1px;" required>
+            <small style="color: #6b7280; font-size: 11px; margin-top: 4px; display: block;">
+                Unique code for your store. Used for cashier login and printed on bills.
+            </small>
         </div>
 
         <div class="input-group">
@@ -115,7 +126,7 @@
 
         <div class="input-group">
             <label for="owner_name">Your Name (Owner) *</label>
-            <input type="text" id="owner_name" name="owner_name" placeholder="e.g. Rajesh Kumar" value="{{ owner_name or '' }}" required>
+            <input type="text" id="owner_name" name="owner_name" placeholder="e.g. John Doe" value="{{ owner_name or '' }}" required>
         </div>
 
         <div class="input-group">
@@ -146,11 +157,30 @@
         <a href="/login" style="color: #2563eb; font-weight: 600; text-decoration: none;">Login here</a>
         <div style="margin-top: 10px;">
             <a href="/about" style="color: #64748b; font-size: 12px; text-decoration: none; font-weight: 600;">
-                ℹ️ About Software &amp; Founder Contact (Dheena)
+                ℹ️ About Software &amp; Founder Contact
             </a>
         </div>
     </div>
 </div>
+
+<script>
+    let userEditedCode = false;
+    const storeCodeInput = document.getElementById('store_code');
+    if (storeCodeInput) {
+        storeCodeInput.addEventListener('input', function() {
+            userEditedCode = true;
+        });
+    }
+
+    function suggestStoreCode(name) {
+        if (userEditedCode) return;
+        const clean = name.replace(/[^A-Za-z0-9]/g, '').toUpperCase().slice(0, 5) || 'STORE';
+        const randNum = Math.floor(100 + Math.random() * 900);
+        if (storeCodeInput) {
+            storeCodeInput.value = clean + '-' + randNum;
+        }
+    }
+</script>
 
 </body>
 </html>
