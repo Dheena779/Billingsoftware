@@ -202,8 +202,8 @@
     {% else %}
     <div class="status-banner trial">
         <div>
-            <span style="background: #2563eb; color: white; font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 6px; text-transform: uppercase;">5-Minute Free Trial</span>
-            <h2 style="margin: 8px 0 4px 0; font-size: 22px; font-weight: 800;">⚡ Free Testing Trial Active</h2>
+            <span style="background: #2563eb; color: white; font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 6px; text-transform: uppercase;">7-Day Free Trial</span>
+            <h2 style="margin: 8px 0 4px 0; font-size: 22px; font-weight: 800;">⚡ Free Trial Active</h2>
             <p style="margin: 0; font-size: 14px; opacity: 0.95;">
                 Time remaining: <strong id="liveTimer" style="font-size: 16px;">{{ time_left_str }}</strong>. Test all billing, inventory, and staff features freely.
             </p>
@@ -224,11 +224,11 @@
     </div>
 
     <div class="plan-cards-grid">
-        <!-- MONTHLY (Rs 499) -->
+        <!-- MONTHLY (Rs 299) -->
         <div class="plan-card">
             <h4 style="font-size: 18px; font-weight: 800; margin: 0 0 6px 0; color: #0f172a;">Monthly Pro</h4>
-            <div style="font-size: 30px; font-weight: 900; color: #2563eb; margin: 10px 0 4px 0;">₹499 <span style="font-size: 13px; color: #64748b; font-weight: 600;">/ 30 Days</span></div>
-            <div style="font-size: 12px; color: #64748b; margin-bottom: 14px;">₹16.6 / day</div>
+            <div style="font-size: 30px; font-weight: 900; color: #2563eb; margin: 10px 0 4px 0;">₹299 <span style="font-size: 13px; color: #64748b; font-weight: 600;">/ 30 Days</span></div>
+            <div style="font-size: 12px; color: #64748b; margin-bottom: 14px;">₹10 / day</div>
             <ul style="text-align: left; font-size: 13px; color: #475569; padding-left: 18px; line-height: 1.8; margin-bottom: 16px;">
                 <li>Unlimited Bills &amp; Invoices</li>
                 <li>Full Product Inventory</li>
@@ -240,20 +240,20 @@
                 onclick="payWithRazorpay('monthly')" 
                 style="display: block; width: 100%; background: #2563eb; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: 800; font-size: 14px; cursor: pointer; transition: 0.2s;"
             >
-                💳 Pay ₹499 via Razorpay
+                💳 Pay ₹299
             </button>
         </div>
 
-        <!-- 3 MONTHS (Rs 1299) -->
+        <!-- 3 MONTHS (Rs 999) -->
         <div class="plan-card">
-            <span style="position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: #3b82f6; color: white; font-size: 10px; font-weight: 800; padding: 3px 10px; border-radius: 20px; text-transform: uppercase;">Save ₹198</span>
+            <span style="position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: #3b82f6; color: white; font-size: 10px; font-weight: 800; padding: 3px 10px; border-radius: 20px; text-transform: uppercase;">Quarterly Pro</span>
             <h4 style="font-size: 18px; font-weight: 800; margin: 6px 0 6px 0; color: #0f172a;">3 Months Pro</h4>
-            <div style="font-size: 30px; font-weight: 900; color: #2563eb; margin: 10px 0 4px 0;">₹1,299 <span style="font-size: 13px; color: #64748b; font-weight: 600;">/ 90 Days</span></div>
-            <div style="font-size: 12px; color: #16a34a; font-weight: 700; margin-bottom: 14px;">₹433 / month</div>
+            <div style="font-size: 30px; font-weight: 900; color: #2563eb; margin: 10px 0 4px 0;">₹999 <span style="font-size: 13px; color: #64748b; font-weight: 600;">/ 90 Days</span></div>
+            <div style="font-size: 12px; color: #16a34a; font-weight: 700; margin-bottom: 14px;">₹333 / month</div>
             <ul style="text-align: left; font-size: 13px; color: #475569; padding-left: 18px; line-height: 1.8; margin-bottom: 16px;">
-                <li>All Monthly Pro features</li>
-                <li>Quarterly Sales &amp; GST Reports</li>
-                <li>Stock Movement Tracking</li>
+                <li>All Pro Features Included</li>
+                <li>90 Days Continuous Cloud Sync</li>
+                <li>Quarterly Sales &amp; GST Tax Reports</li>
                 <li>Priority Feature Updates</li>
             </ul>
             <button 
@@ -261,20 +261,20 @@
                 onclick="payWithRazorpay('quarterly')" 
                 style="display: block; width: 100%; background: #2563eb; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: 800; font-size: 14px; cursor: pointer; transition: 0.2s;"
             >
-                💳 Pay ₹1,299 via Razorpay
+                💳 Pay ₹999
             </button>
         </div>
 
-        <!-- 6 MONTHS (Rs 2799) -->
+        <!-- 6 MONTHS (Rs 1999) -->
         <div class="plan-card">
-            <span style="position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: #059669; color: white; font-size: 10px; font-weight: 800; padding: 3px 10px; border-radius: 20px; text-transform: uppercase;">Save ₹195</span>
+            <span style="position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: #059669; color: white; font-size: 10px; font-weight: 800; padding: 3px 10px; border-radius: 20px; text-transform: uppercase;">Half-Yearly Pro</span>
             <h4 style="font-size: 18px; font-weight: 800; margin: 6px 0 6px 0; color: #0f172a;">6 Months Pro</h4>
-            <div style="font-size: 30px; font-weight: 900; color: #059669; margin: 10px 0 4px 0;">₹2,799 <span style="font-size: 13px; color: #64748b; font-weight: 600;">/ 180 Days</span></div>
-            <div style="font-size: 12px; color: #16a34a; font-weight: 700; margin-bottom: 14px;">₹466 / month</div>
+            <div style="font-size: 30px; font-weight: 900; color: #059669; margin: 10px 0 4px 0;">₹1,999 <span style="font-size: 13px; color: #64748b; font-weight: 600;">/ 180 Days</span></div>
+            <div style="font-size: 12px; color: #16a34a; font-weight: 700; margin-bottom: 14px;">₹333 / month</div>
             <ul style="text-align: left; font-size: 13px; color: #475569; padding-left: 18px; line-height: 1.8; margin-bottom: 16px;">
-                <li>All Pro features included</li>
-                <li>6 Months Cloud Backup</li>
-                <li>Staff Payroll &amp; Salary Advances</li>
+                <li>All Pro Features Included</li>
+                <li>180 Days Uninterrupted Operations</li>
+                <li>6 Months Cloud Backup Protection</li>
                 <li>Dedicated Priority Support</li>
             </ul>
             <button 
@@ -282,20 +282,20 @@
                 onclick="payWithRazorpay('half_yearly')" 
                 style="display: block; width: 100%; background: #059669; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: 800; font-size: 14px; cursor: pointer; transition: 0.2s;"
             >
-                ⭐ Pay ₹2,799 via Razorpay
+                ⭐ Pay ₹1,999
             </button>
         </div>
 
         <!-- ANNUAL (Rs 3999) - FEATURED -->
         <div class="plan-card featured">
-            <span style="position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: #dc2626; color: white; font-size: 10px; font-weight: 900; padding: 3px 12px; border-radius: 20px; text-transform: uppercase;">Best Value (Save ₹1,989)</span>
+            <span style="position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: #dc2626; color: white; font-size: 10px; font-weight: 900; padding: 3px 12px; border-radius: 20px; text-transform: uppercase;">Best Value (1 Full Year)</span>
             <h4 style="font-size: 18px; font-weight: 800; margin: 6px 0 6px 0; color: #0f172a;">Annual Pro (1 Year)</h4>
             <div style="font-size: 32px; font-weight: 900; color: #16a34a; margin: 10px 0 4px 0;">₹3,999 <span style="font-size: 13px; color: #64748b; font-weight: 600;">/ 365 Days</span></div>
             <div style="font-size: 12px; color: #16a34a; font-weight: 800; margin-bottom: 14px;">Only ₹333 / month</div>
             <ul style="text-align: left; font-size: 13px; color: #475569; padding-left: 18px; line-height: 1.8; margin-bottom: 16px;">
                 <li>Full 365 Days Uninterrupted Pro</li>
                 <li>Custom Thermal Invoice Branding</li>
-                <li>Full Multi-Device Access</li>
+                <li>Full Multi-Device Real-Time Sync</li>
                 <li>Direct Priority Founder Support</li>
             </ul>
             <button 
@@ -303,7 +303,7 @@
                 onclick="payWithRazorpay('annual')" 
                 style="display: block; width: 100%; background: #16a34a; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: 800; font-size: 14px; cursor: pointer; transition: 0.2s;"
             >
-                🔥 Pay ₹3,999 via Razorpay
+                🔥 Pay ₹3,999
             </button>
         </div>
     </div>

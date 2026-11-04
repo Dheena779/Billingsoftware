@@ -4383,20 +4383,20 @@ SUBSCRIPTION_PLANS = {
     },
     "monthly": {
         "name": "Monthly Pro Plan (30 Days)",
-        "amount_paise": 49900,   # ₹499.00
-        "price_rupees": 499.0,
+        "amount_paise": 29900,   # ₹299.00
+        "price_rupees": 299.0,
         "duration_minutes": 30 * 24 * 60  # 43200 minutes (30 days)
     },
     "quarterly": {
         "name": "3-Month Pro Plan (90 Days)",
-        "amount_paise": 129900,  # ₹1,299.00
-        "price_rupees": 1299.0,
+        "amount_paise": 99900,   # ₹999.00
+        "price_rupees": 999.0,
         "duration_minutes": 90 * 24 * 60  # 129600 minutes (90 days)
     },
     "half_yearly": {
         "name": "6-Month Pro Plan (180 Days)",
-        "amount_paise": 279900,  # ₹2,799.00
-        "price_rupees": 2799.0,
+        "amount_paise": 199900,  # ₹1,999.00
+        "price_rupees": 1999.0,
         "duration_minutes": 180 * 24 * 60  # 259200 minutes (180 days)
     },
     "annual": {

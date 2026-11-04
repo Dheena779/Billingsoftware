@@ -766,7 +766,7 @@ def initialize_database():
 
 def register_new_store(store_name, owner_name, email_or_phone, password, city="", state="", address="", business_type="", custom_store_code=None, email_verified=0):
     """
-    Registers a new store with a 5-minute free trial.
+    Registers a new store with a 7-day free trial.
     Creates:
       1. Store in `stores` table
       2. Admin user in `users` table
@@ -989,7 +989,7 @@ def get_store_subscription(store_id):
                     "business_category": b_cat
                 }
 
-        # Case 2: Free Trial (5 minutes)
+        # Case 2: Free Trial (7 Days)
         if plan_status == "trial":
             if trial_ends:
                 sec_left, mins_left, days_left, time_str = calc_remaining(trial_ends)
